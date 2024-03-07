@@ -8,7 +8,7 @@
     - [Add new handler for user](#add-new-handler-for-user)
     - [Add new service for user](#add-new-service-for-user)
     - [Add new repo for user using mysql database](#add-new-repo-for-user-using-mysql-database)
-
+- [ER Diagram](#er-diagram)
 
 # Project structure
 ```
@@ -95,3 +95,6 @@ make docker_down
 * Command repo is used to insert, update, delete data from database
 1. Add command repo in [app/repo/mysql/user/command.go](app/repo/mysql/user/command.go)
 2. Add command repo test in [app/repo/mysql/user/command_test.go](app/repo/mysql/user/command_test.go)
+
+# ER Diagram
+![Untitled Diagram](https://github.com/JamesHooMY/banking/assets/87403901/a929a78f-3e8a-4188-8c6f-63a8e93c83ab)
