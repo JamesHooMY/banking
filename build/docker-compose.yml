@@ -1,0 +1,62 @@
+version: '3.1'
+
+services:
+    myapp:
+        build:
+            context: ../
+            dockerfile: Dockerfile
+        ports:
+            - '8080:8080'
+        depends_on:
+            mysql-master:
+                condition: service_healthy
+            mysql-slave:
+                condition: service_healthy
+        networks:
+            - mynetwork
+
+    mysql-master:
+        image: mysql:latest
+        container_name: mysql-master
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD: root_password
+            MYSQL_DATABASE: banking
+        ports:
+            - '3306:3306'
+        healthcheck:
+            test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-P', '3306', '-u', 'root', '-p$MYSQL_ROOT_PASSWORD']
+            interval: 10s
+            timeout: 5s
+            retries: 3
+        networks:
+            - mynetwork
+        # volumes:
+        #     - ./mysql-master-data:/var/lib/mysql
+
+    mysql-slave:
+        image: mysql:latest
+        container_name: mysql-slave
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD: root_password
+            MYSQL_DATABASE: banking
+            MYSQL_MASTER_HOST: mysql-master
+            MYSQL_MASTER_PORT: 3306
+            MYSQL_MASTER_ROOT_PASSWORD: root_password
+        healthcheck:
+            test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-P', '3306', '-u', 'root', '-p$MYSQL_ROOT_PASSWORD']
+            interval: 10s
+            timeout: 5s
+            retries: 3
+        networks:
+            - mynetwork
+        # volumes:
+        #     - ./mysql-slave-data:/var/lib/mysql
+
+# volumes:
+#     mysql-master-data:
+#     mysql-slave-data:
+
+networks:
+    mynetwork:

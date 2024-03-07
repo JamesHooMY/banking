@@ -1,0 +1,9 @@
+.idea
+.vscode
+
+config/config.yaml
+log/*.log
+vendor
+
+/build/*
+!/build/docker-compose.yml

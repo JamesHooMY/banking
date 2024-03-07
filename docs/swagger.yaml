@@ -1,0 +1,85 @@
+definitions:
+  user.CreateUserReq:
+    properties:
+      name:
+        maxLength: 20
+        minLength: 3
+        type: string
+    required:
+    - name
+    type: object
+  user.CreateUserResp:
+    properties:
+      data:
+        $ref: '#/definitions/user.User'
+      msg:
+        type: string
+    type: object
+  user.User:
+    properties:
+      balance:
+        type: number
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  v1.ErrResponse:
+    properties:
+      data: {}
+      msg:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: This is a sample server celler server.
+  title: banking API
+  version: 0.0.1
+paths:
+  /api/v1/user:
+    post:
+      consumes:
+      - application/json
+      description: Create User
+      parameters:
+      - description: create user request
+        in: body
+        name: CreateUserReq
+        schema:
+          $ref: '#/definitions/user.CreateUserReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            $ref: '#/definitions/user.CreateUserResp'
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/v1.ErrResponse'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/v1.ErrResponse'
+      summary: Create User
+      tags:
+      - User
+  /api/v1/user/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get User
+      parameters:
+      - description: user id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses: {}
+      summary: Get User
+      tags:
+      - User
+swagger: "2.0"
