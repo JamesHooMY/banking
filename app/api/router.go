@@ -13,13 +13,14 @@ import (
 	"github.com/spf13/viper"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"go.elastic.co/apm/module/apmgin/v2"
+	"go.elastic.co/apm/v2"
 	"gorm.io/gorm"
 )
 
-func InitRouter(router *gin.Engine, db *gorm.DB) *gin.Engine {
+func InitRouter(router *gin.Engine, db *gorm.DB, tracer *apm.Tracer) *gin.Engine {
 	// middleware
-	// * if need cors then uncomment this line
-	// router.Use(middleware.Cors())
+	router.Use(apmgin.Middleware(router, apmgin.WithTracer(tracer))) // apm gin middleware
 
 	// swagger
 	// docs.SwaggerInfo.BasePath = fmt.Sprintf("/api/%s", viper.GetString("server.apiVersion"))

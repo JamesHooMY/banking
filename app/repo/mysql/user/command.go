@@ -8,6 +8,7 @@ import (
 	"banking/model"
 
 	"github.com/shopspring/decimal"
+	"go.elastic.co/apm/v2"
 	"gorm.io/gorm"
 )
 
@@ -22,6 +23,9 @@ func NewUserCommandRepo(db *gorm.DB) user.IUserCommandRepo {
 }
 
 func (r *userCommandRepo) CreateUser(ctx context.Context, user *model.User) (err error) {
+	span, ctx := apm.StartSpan(ctx, "userCommandRepo.CreateUser", "repo")
+	defer span.End()
+
 	result := r.db.WithContext(ctx).Create(user)
 	if err := result.Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -34,20 +38,25 @@ func (r *userCommandRepo) CreateUser(ctx context.Context, user *model.User) (err
 }
 
 func (r *userCommandRepo) Transfer(ctx context.Context, fromUserID, toUserID uint, amount decimal.Decimal) (user *model.User, err error) {
+	span, ctx := apm.StartSpan(ctx, "userCommandRepo.Transfer", "repo")
+	defer span.End()
+
 	tx := r.db.WithContext(ctx).Begin()
 	if err := tx.Error; err != nil {
 		return nil, err
 	}
 
 	fromUser := &model.User{}
-	result := tx.Model(&model.User{}).Where("id = ?", fromUserID).First(fromUser)
+	// result := tx.Model(&model.User{}).Where("id = ?", fromUserID).First(fromUser)
+	result := tx.Where("id = ?", fromUserID).Take(fromUser)
 	if err := result.Error; err != nil {
 		tx.Rollback()
 		return nil, err
 	}
 
 	toUser := &model.User{}
-	result = tx.Model(&model.User{}).Where("id = ?", toUserID).First(toUser)
+	// result = tx.Model(&model.User{}).Where("id = ?", toUserID).First(toUser)
+	result = tx.Where("id = ?", toUserID).Take(toUser)
 	if err := result.Error; err != nil {
 		tx.Rollback()
 		return nil, err
@@ -97,6 +106,9 @@ func (r *userCommandRepo) Transfer(ctx context.Context, fromUserID, toUserID uin
 }
 
 func (r *userCommandRepo) Deposit(ctx context.Context, userID uint, amount decimal.Decimal) (user *model.User, err error) {
+	span, ctx := apm.StartSpan(ctx, "userCommandRepo.Deposit", "repo")
+	defer span.End()
+
 	tx := r.db.WithContext(ctx).Begin()
 	if err := tx.Error; err != nil {
 		return nil, err
@@ -141,6 +153,9 @@ func (r *userCommandRepo) Deposit(ctx context.Context, userID uint, amount decim
 }
 
 func (r *userCommandRepo) Withdraw(ctx context.Context, userID uint, amount decimal.Decimal) (user *model.User, err error) {
+	span, ctx := apm.StartSpan(ctx, "userCommandRepo.Withdraw", "repo")
+	defer span.End()
+
 	tx := r.db.WithContext(ctx).Begin()
 	if err := tx.Error; err != nil {
 		return nil, err

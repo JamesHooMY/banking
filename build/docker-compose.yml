@@ -1,19 +1,19 @@
 version: '3.1'
 
 services:
-    myapp:
-        build:
-            context: ../
-            dockerfile: Dockerfile
-        ports:
-            - '8080:8080'
-        depends_on:
-            mysql-master:
-                condition: service_healthy
-            mysql-slave:
-                condition: service_healthy
-        networks:
-            - mynetwork
+    # myapp:
+    #     build:
+    #         context: ../
+    #         dockerfile: Dockerfile
+    #     ports:
+    #         - '8080:8080'
+    #     depends_on:
+    #         mysql-master:
+    #             condition: service_healthy
+    #         mysql-slave:
+    #             condition: service_healthy
+    #     networks:
+    #         - mynetwork
 
     mysql-master:
         image: mysql:latest
@@ -54,9 +54,87 @@ services:
         # volumes:
         #     - ./mysql-slave-data:/var/lib/mysql
 
-# volumes:
-#     mysql-master-data:
-#     mysql-slave-data:
+    # volumes:
+    #     mysql-master-data:
+    #     mysql-slave-data:
+
+    prometheus:
+        image: prom/prometheus
+        container_name: prometheus
+        restart: always
+        ports:
+            - '9090:9090'
+        healthcheck:
+            test: ['CMD', 'curl', '-f', 'http://localhost:9090/-/healthy']
+            interval: 30s
+            timeout: 10s
+            retries: 3
+            start_period: 60s
+        networks:
+            - mynetwork
+
+    grafana:
+        image: grafana/grafana
+        container_name: grafana
+        restart: always
+        ports:
+            - '3000:3000'
+        depends_on:
+            - prometheus
+        healthcheck:
+            test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/health']
+            interval: 10s
+            timeout: 5s
+            retries: 3
+        networks:
+            - mynetwork
+
+    elasticsearch:
+        image: docker.elastic.co/elasticsearch/elasticsearch:7.15.2
+        container_name: elasticsearch
+        restart: always
+        environment:
+            - discovery.type=single-node
+        ports:
+            - '9200:9200'
+        healthcheck:
+            test: ['CMD-SHELL', 'curl --silent --fail localhost:9200/_cluster/health || exit 1']
+            interval: 10s
+            timeout: 5s
+            retries: 3
+        networks:
+            - mynetwork
+
+    kibana:
+        image: docker.elastic.co/kibana/kibana:7.15.2
+        container_name: kibana
+        restart: always
+        environment:
+            - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+        ports:
+            - '5601:5601'
+        depends_on:
+            - elasticsearch
+        healthcheck:
+            test: ['CMD', 'curl', '-f', 'http://localhost:5601/api/status']
+            interval: 10s
+            timeout: 5s
+            retries: 3
+        networks:
+            - mynetwork
+
+    apm_server:
+        image: docker.elastic.co/apm/apm-server:7.15.2
+        container_name: apm_server
+        restart: always
+        ports:
+            - '8200:8200'
+        environment:
+            - OUTPUT_ELASTICSEARCH_ENABLED=true
+            - OUTPUT_ELASTICSEARCH_HOSTS=[ "elasticsearch:9200" ]
+            - SECRET_TOKEN=apmToken
+        networks:
+            - mynetwork
 
 networks:
     mynetwork:

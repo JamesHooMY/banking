@@ -22,7 +22,7 @@ var mockUserService *mock.MockIUserService
 
 func initialUserHandler(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	router.InitRouter(gin.Default(), nil)
+	router.InitRouter(gin.Default(), nil, nil)
 
 	ctrl := gomock.NewController(t)
 	mockUserService = mock.NewMockIUserService(ctrl)

@@ -9,7 +9,7 @@ import (
 
 	"github.com/shopspring/decimal"
 	"github.com/spf13/viper"
-	"gorm.io/driver/mysql"
+	mysql "go.elastic.co/apm/module/apmgormv2/v2/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
@@ -40,23 +40,26 @@ func InitMySQL(ctx context.Context) (*gorm.DB, error) {
 	if err != nil {
 		return nil, err
 	}
+	db = db.WithContext(ctx)
 
+	// Set up connection pool
 	sqlDB, err := db.DB()
 	if err != nil {
 		return nil, err
 	}
-
 	sqlDB.SetMaxIdleConns(viper.GetInt("mysql.maxIdleConns"))
 	sqlDB.SetMaxOpenConns(viper.GetInt("mysql.maxOpenConns"))
 	sqlDB.SetConnMaxLifetime(time.Duration(viper.GetInt("mysql.maxLifetime")) * time.Hour)
 
-	if err := db.WithContext(ctx).AutoMigrate(
+	// Auto migrate
+	if err := db.AutoMigrate(
 		&model.User{},
 		&model.Transaction{},
 	); err != nil {
 		return nil, err
 	}
 
+	// Seed User data
 	seedUsers(db)
 
 	return db, nil

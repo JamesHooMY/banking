@@ -65,4 +65,15 @@ func initConfig() {
 
 	// log.Println("Using config file:", viper.ConfigFileUsed())
 	log.Println("Server mode:", viper.Get("server.runMode"))
+
+	// set apm server env
+	if err := os.Setenv("ELASTIC_APM_SERVICE_NAME", viper.GetString("apm.serviceName")); err != nil {
+		panic(fmt.Errorf("Fatal error set apm service name: %s \n", err))
+	}
+	if err := os.Setenv("ELASTIC_APM_SERVER_URL", viper.GetString("apm.serverUrl")); err != nil {
+		panic(fmt.Errorf("Fatal error set apm server url: %s \n", err))
+	}
+	if err := os.Setenv("ELASTIC_APM_SECRET_TOKEN", viper.GetString("apm.secretToken")); err != nil {
+		panic(fmt.Errorf("Fatal error set apm secret token: %s \n", err))
+	}
 }

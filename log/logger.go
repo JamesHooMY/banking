@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/spf13/viper"
+	"go.elastic.co/apm/module/apmzap/v2"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -25,6 +26,10 @@ func InitLogger() (*zap.SugaredLogger, error) {
 
 	// combine two cores
 	core := zapcore.NewTee(fileCore, consoleCore)
+
+	// apm
+	apm := &apmzap.Core{}
+	core = zapcore.NewTee(core, apm)
 
 	return zap.New(core).Sugar(), nil
 }

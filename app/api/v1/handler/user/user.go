@@ -15,6 +15,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
+	"go.elastic.co/apm/v2"
 )
 
 type IUserHandler interface {
@@ -48,8 +49,12 @@ func NewUserHandler(userService userSrv.IUserService) IUserHandler {
 // @Failure 500 {object} v1.ErrResponse "internal server error"
 func (h *UserHandler) CreateUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		span, ctx := apm.StartSpan(c.Request.Context(), "UserHandler.CreateUser", "handler")
+		defer span.End()
+
 		var input CreateUserReq
 		if err := c.ShouldBindJSON(&input); err != nil {
+			apm.CaptureError(ctx, err).Send()
 			c.AbortWithStatusJSON(http.StatusBadRequest, &v1.ErrResponse{
 				Msg: err.Error(),
 			})
@@ -60,14 +65,16 @@ func (h *UserHandler) CreateUser() gin.HandlerFunc {
 			Name:    input.Name,
 			Balance: decimal.NewFromFloat(0),
 		}
-		if err := h.UserService.CreateUser(c, user); err != nil {
+		if err := h.UserService.CreateUser(ctx, user); err != nil {
 			if errors.Is(err, userRepo.ErrUserExisted) {
+				apm.CaptureError(ctx, err).Send()
 				c.AbortWithStatusJSON(http.StatusBadRequest, &v1.ErrResponse{
 					Msg: userRepo.ErrUserExisted.Error(),
 				})
 				return
 			}
 
+			apm.CaptureError(ctx, err).Send()
 			c.AbortWithStatusJSON(http.StatusInternalServerError, &v1.ErrResponse{
 				Msg: err.Error(),
 			})
@@ -112,18 +119,23 @@ type CreateUserResp struct {
 // @Failure 500 {object} v1.ErrResponse "internal server error"
 func (h *UserHandler) GetUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		span, ctx := apm.StartSpan(c.Request.Context(), "UserHandler.GetUser", "handler")
+		defer span.End()
+
 		id := c.Param("id")
 
 		userID, err := strconv.ParseUint(id, 10, 64)
 		if err != nil {
+			apm.CaptureError(ctx, err).Send()
 			c.AbortWithStatusJSON(http.StatusBadRequest, &v1.ErrResponse{
 				Msg: "invalid user id",
 			})
 			return
 		}
 
-		user, err := h.UserService.GetUser(c, uint(userID))
+		user, err := h.UserService.GetUser(ctx, uint(userID))
 		if err != nil {
+			apm.CaptureError(ctx, err).Send()
 			c.AbortWithStatusJSON(http.StatusInternalServerError, &v1.ErrResponse{
 				Msg: err.Error(),
 			})
@@ -148,8 +160,12 @@ type GetUserResp struct {
 
 func (h *UserHandler) GetUsers() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		users, err := h.UserService.GetUsers(c)
+		span, ctx := apm.StartSpan(c.Request.Context(), "UserHandler.GetUsers", "handler")
+		defer span.End()
+
+		users, err := h.UserService.GetUsers(ctx)
 		if err != nil {
+			apm.CaptureError(ctx, err).Send()
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
@@ -163,6 +179,9 @@ func (h *UserHandler) GetUsers() gin.HandlerFunc {
 
 func (h *UserHandler) Transfer() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		span, ctx := apm.StartSpan(c.Request.Context(), "UserHandler.Transfer", "handler")
+		defer span.End()
+
 		var input struct {
 			FromUserID uint    `json:"fromUserId" binding:"required,min=1,number"`
 			ToUserID   uint    `json:"toUserId" binding:"required,min=1,number"`
@@ -170,6 +189,7 @@ func (h *UserHandler) Transfer() gin.HandlerFunc {
 		}
 
 		if err := c.ShouldBindJSON(&input); err != nil {
+			apm.CaptureError(ctx, err).Send()
 			c.AbortWithStatusJSON(http.StatusBadRequest, &v1.ErrResponse{
 				Msg: err.Error(),
 			})
@@ -183,15 +203,17 @@ func (h *UserHandler) Transfer() gin.HandlerFunc {
 			return
 		}
 
-		user, err := h.UserService.Transfer(c, input.FromUserID, input.ToUserID, decimal.NewFromFloat(input.Amount))
+		user, err := h.UserService.Transfer(ctx, input.FromUserID, input.ToUserID, decimal.NewFromFloat(input.Amount))
 		if err != nil {
 			if errors.Is(err, userRepo.ErrInsufficientBalance) {
+				apm.CaptureError(ctx, err).Send()
 				c.AbortWithStatusJSON(http.StatusBadRequest, &v1.ErrResponse{
 					Msg: userRepo.ErrInsufficientBalance.Error(),
 				})
 				return
 			}
 
+			apm.CaptureError(ctx, err).Send()
 			c.AbortWithStatusJSON(http.StatusInternalServerError, &v1.ErrResponse{
 				Msg: err.Error(),
 			})
@@ -209,20 +231,25 @@ func (h *UserHandler) Transfer() gin.HandlerFunc {
 
 func (h *UserHandler) Deposit() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		span, ctx := apm.StartSpan(c.Request.Context(), "UserHandler.Deposit", "handler")
+		defer span.End()
+
 		var input struct {
 			UserID uint    `json:"userId" binding:"required,min=1,number"`
 			Amount float64 `json:"amount" binding:"required,gt=0,number"`
 		}
 
 		if err := c.ShouldBindJSON(&input); err != nil {
+			apm.CaptureError(ctx, err).Send()
 			c.AbortWithStatusJSON(http.StatusBadRequest, &v1.ErrResponse{
 				Msg: err.Error(),
 			})
 			return
 		}
 
-		user, err := h.UserService.Deposit(c, input.UserID, decimal.NewFromFloat(input.Amount))
+		user, err := h.UserService.Deposit(ctx, input.UserID, decimal.NewFromFloat(input.Amount))
 		if err != nil {
+			apm.CaptureError(ctx, err).Send()
 			c.AbortWithStatusJSON(http.StatusInternalServerError, &v1.ErrResponse{
 				Msg: err.Error(),
 			})
@@ -240,27 +267,33 @@ func (h *UserHandler) Deposit() gin.HandlerFunc {
 
 func (h *UserHandler) Withdraw() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		span, ctx := apm.StartSpan(c.Request.Context(), "UserHandler.Withdraw", "handler")
+		defer span.End()
+
 		var input struct {
 			UserID uint    `json:"userId" binding:"required,min=1,number"`
 			Amount float64 `json:"amount" binding:"required,gt=0,number"`
 		}
 
 		if err := c.ShouldBindJSON(&input); err != nil {
+			apm.CaptureError(ctx, err).Send()
 			c.AbortWithStatusJSON(http.StatusBadRequest, &v1.ErrResponse{
 				Msg: err.Error(),
 			})
 			return
 		}
 
-		user, err := h.UserService.Withdraw(c, input.UserID, decimal.NewFromFloat(input.Amount))
+		user, err := h.UserService.Withdraw(ctx, input.UserID, decimal.NewFromFloat(input.Amount))
 		if err != nil {
 			if errors.Is(err, userRepo.ErrInsufficientBalance) {
+				apm.CaptureError(ctx, err).Send()
 				c.AbortWithStatusJSON(http.StatusBadRequest, &v1.ErrResponse{
 					Msg: userRepo.ErrInsufficientBalance.Error(),
 				})
 				return
 			}
 
+			apm.CaptureError(ctx, err).Send()
 			c.AbortWithStatusJSON(http.StatusInternalServerError, &v1.ErrResponse{
 				Msg: err.Error(),
 			})

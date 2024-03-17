@@ -20,6 +20,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"go.elastic.co/apm/v2"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -59,8 +60,16 @@ func RunApiserver(cmd *cobra.Command, _ []string) {
 		panic(errMsg)
 	}
 
+	// apm tracer
+	tracer, err := apm.NewTracer(viper.GetString("apm.serviceName"), "")
+	if err != nil {
+		global.Logger.Error("Init apm tracer error: %s\n", err)
+		panic(err)
+	}
+
 	// init router
-	r := router.InitRouter(gin.Default(), db)
+	engine := gin.Default()
+	r := router.InitRouter(engine, db, tracer)
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%d", viper.GetInt("server.httpPort")),
 		Handler: r,
