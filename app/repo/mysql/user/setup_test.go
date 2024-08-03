@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/ory/dockertest/v3"
+	"github.com/ory/dockertest/v3/docker"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -19,11 +20,11 @@ var mysqlDB *gorm.DB
 
 func TestMain(m *testing.M) {
 	pool, resource, db := InitialDockerMySQL()
-
 	mysqlDB = db
 
 	code := m.Run()
 
+	// Clean up resource
 	if err := pool.Purge(resource); err != nil {
 		log.Fatalf("Could not purge resource: %s", err)
 	}
@@ -36,7 +37,8 @@ func InitialDockerMySQL() (
 	resource *dockertest.Resource,
 	db *gorm.DB,
 ) {
-	pool, err := dockertest.NewPool("")
+	var err error
+	pool, err = dockertest.NewPool("")
 	if err != nil {
 		log.Fatalf("Could not connect to docker: %s", err)
 	}
@@ -49,18 +51,22 @@ func InitialDockerMySQL() (
 			"MYSQL_ROOT_PASSWORD=root_password",
 			"MYSQL_DATABASE=banking",
 		},
-		ExposedPorts: []string{"3306"},
+		ExposedPorts: []string{"3306/tcp"},
 	}
 
-	resource, err = pool.RunWithOptions(options)
+	resource, err = pool.RunWithOptions(options, func(config *docker.HostConfig) {
+		config.AutoRemove = true
+		config.RestartPolicy = docker.RestartPolicy{Name: "no"}
+	})
 	if err != nil {
 		log.Fatalf("Could not start resource: %s", err)
 	}
 
+	// Exponential backoff-retry for the container to be ready
 	if err = pool.Retry(func() error {
 		dsn := fmt.Sprintf(
 			"root:root_password@tcp(%s)/banking?charset=utf8mb4&parseTime=True&loc=Local",
-			getHostPort(resource, "3306/tcp"),
+			resource.GetHostPort("3306/tcp"),
 		)
 
 		location, errL := time.LoadLocation("UTC")
@@ -82,8 +88,17 @@ func InitialDockerMySQL() (
 			return err
 		}
 
-		return nil
+		sqlDB, errDB := db.DB()
+		if errDB != nil {
+			return errDB
+		}
+
+		return sqlDB.Ping()
 	}); err != nil {
+		// Clean up resource if there is an error
+		if purgeErr := pool.Purge(resource); purgeErr != nil {
+			log.Fatalf("Could not purge resource: %s", purgeErr)
+		}
 		log.Fatalf("Could not connect to docker: %s", err)
 	}
 

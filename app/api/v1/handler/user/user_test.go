@@ -16,13 +16,17 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
+	"go.elastic.co/apm/v2"
 )
 
 var mockUserService *mock.MockIUserService
 
 func initialUserHandler(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	router.InitRouter(gin.Default(), nil, nil)
+
+	// Initialize APM tracer
+	tracer := apm.DefaultTracer()
+	router.InitRouter(gin.Default(), nil, nil, tracer)
 
 	ctrl := gomock.NewController(t)
 	mockUserService = mock.NewMockIUserService(ctrl)

@@ -76,4 +76,18 @@ func initConfig() {
 	if err := os.Setenv("ELASTIC_APM_SECRET_TOKEN", viper.GetString("apm.secretToken")); err != nil {
 		panic(fmt.Errorf("Fatal error set apm secret token: %s \n", err))
 	}
+
+	// set elasticsearch env
+	if err := os.Setenv("ELASTICSEARCH_URL", viper.GetString("elasticsearch.url")); err != nil {
+		panic(fmt.Errorf("Fatal error set elasticsearch url: %s \n", err))
+	}
+	if err := os.Setenv("ELASTICSEARCH_USERNAME", viper.GetString("elasticsearch.username")); err != nil {
+		panic(fmt.Errorf("Fatal error set elasticsearch username: %s \n", err))
+	}
+	if err := os.Setenv("ELASTICSEARCH_PASSWORD", viper.GetString("elasticsearch.password")); err != nil {
+		panic(fmt.Errorf("Fatal error set elasticsearch password: %s \n", err))
+	}
+	if err := os.Setenv("ELASTICSEARCH_INDEX", viper.GetString("elasticsearch.index")); err != nil {
+		panic(fmt.Errorf("Fatal error set elasticsearch index: %s \n", err))
+	}
 }
