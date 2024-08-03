@@ -1,6 +1,9 @@
 run:
 	go run main.go apiserver
 
+build:
+	go build -o apiserver main.go
+
 lint:
 	golangci-lint run --timeout 10m ./... --fix
 

@@ -32,9 +32,14 @@ var apiserverCmd = &cobra.Command{
 }
 
 func RunApiserver(cmd *cobra.Command, _ []string) {
+	// apm tracer
+	tracer, err := apm.NewTracer(viper.GetString("apm.serviceName"), "")
+	if err != nil {
+		panic(fmt.Sprintf("Init apm error: %s\n", err))
+	}
+
 	// init logger
-	var err error
-	if global.Logger, err = logger.InitLogger(); err != nil {
+	if global.Logger, err = logger.InitLogger(tracer); err != nil {
 		panic(fmt.Sprintf("Init logger error: %s\n", err))
 	}
 
@@ -58,13 +63,6 @@ func RunApiserver(cmd *cobra.Command, _ []string) {
 		errMsg := fmt.Sprintf("Init MySQL error: %s\n", err)
 		global.Logger.Error(errMsg)
 		panic(errMsg)
-	}
-
-	// apm tracer
-	tracer, err := apm.NewTracer(viper.GetString("apm.serviceName"), "")
-	if err != nil {
-		global.Logger.Error("Init apm tracer error: %s\n", err)
-		panic(err)
 	}
 
 	// init router

@@ -8,12 +8,13 @@ import (
 
 	"github.com/spf13/viper"
 	"go.elastic.co/apm/module/apmzap/v2"
+	"go.elastic.co/apm/v2"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
-func InitLogger() (*zap.SugaredLogger, error) {
+func InitLogger(tracer *apm.Tracer) (*zap.SugaredLogger, error) {
 	logMode := zapcore.InfoLevel
 
 	// local file log
@@ -24,12 +25,12 @@ func InitLogger() (*zap.SugaredLogger, error) {
 	consoleConfig.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	consoleCore := zapcore.NewCore(zapcore.NewConsoleEncoder(consoleConfig.EncoderConfig), zapcore.AddSync(os.Stdout), logMode)
 
-	// combine two cores
-	core := zapcore.NewTee(fileCore, consoleCore)
-
 	// apm
-	apm := &apmzap.Core{}
-	core = zapcore.NewTee(core, apm)
+	apmzapCore := &apmzap.Core{Tracer: tracer}
+	apmzapWrapCore := apmzapCore.WrapCore(fileCore)
+
+	// combine three cores
+	core := zapcore.NewTee(fileCore, consoleCore, apmzapWrapCore)
 
 	return zap.New(core).Sugar(), nil
 }

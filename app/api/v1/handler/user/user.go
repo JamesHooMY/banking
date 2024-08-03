@@ -15,6 +15,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
+	"go.elastic.co/apm/module/apmzap/v2"
 	"go.elastic.co/apm/v2"
 )
 
@@ -220,7 +221,7 @@ func (h *UserHandler) Transfer() gin.HandlerFunc {
 			return
 		}
 
-		global.Logger.Info(fmt.Sprintf("[Transfer]: fromUserId: %d, toUserId: %d, amount: %f", input.FromUserID, input.ToUserID, input.Amount))
+		global.Logger.With(apmzap.TraceContext(ctx)).Info(fmt.Sprintf("[Transfer]: fromUserId: %d, toUserId: %d, amount: %f", input.FromUserID, input.ToUserID, input.Amount))
 
 		c.JSON(http.StatusOK, &v1.ErrResponse{
 			Data: user,
@@ -256,7 +257,7 @@ func (h *UserHandler) Deposit() gin.HandlerFunc {
 			return
 		}
 
-		global.Logger.Info(fmt.Sprintf("[Deposit]: userId: %d, amount: %f", input.UserID, input.Amount))
+		global.Logger.With(apmzap.TraceContext(ctx)).Info(fmt.Sprintf("[Deposit]: userId: %d, amount: %f", input.UserID, input.Amount))
 
 		c.JSON(http.StatusOK, &v1.ErrResponse{
 			Data: user,
@@ -300,7 +301,7 @@ func (h *UserHandler) Withdraw() gin.HandlerFunc {
 			return
 		}
 
-		global.Logger.Info(fmt.Sprintf("[Withdraw]: userId: %d, amount: %f", input.UserID, input.Amount))
+		global.Logger.With(apmzap.TraceContext(ctx)).Info(fmt.Sprintf("[Withdraw]: userId: %d, amount: %f", input.UserID, input.Amount))
 
 		c.JSON(http.StatusOK, &v1.ErrResponse{
 			Data: user,
