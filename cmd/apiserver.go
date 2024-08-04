@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"syscall"
@@ -71,6 +72,15 @@ func RunApiserver(cmd *cobra.Command, _ []string) {
 		Addr:    fmt.Sprintf(":%d", viper.GetInt("server.httpPort")),
 		Handler: r,
 	}
+
+	// Start pprof server
+	go func() {
+		pprofAddr := fmt.Sprintf(":%d", viper.GetInt("pprof.port"))
+		global.Logger.Infof("Start pprof server %s\n", pprofAddr)
+		if err := http.ListenAndServe(pprofAddr, nil); err != nil && err != http.ErrServerClosed {
+			global.Logger.Fatalf("Pprof server error: %s\n", err)
+		}
+	}()
 
 	// start server in goroutine
 	go func() {

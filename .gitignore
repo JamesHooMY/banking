@@ -7,3 +7,4 @@ log/*.log
 vendor
 
 /build/k6/results
+/pprof
