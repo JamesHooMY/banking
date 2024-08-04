@@ -18,19 +18,21 @@ import (
 	"gorm.io/gorm"
 )
 
-func InitRouter(router *gin.Engine, db *gorm.DB, tracer *apm.Tracer) *gin.Engine {
-	// middleware
-	router.Use(apmgin.Middleware(router, apmgin.WithTracer(tracer))) // apm gin middleware
+func InitRouter(router *gin.Engine, masterDB *gorm.DB, slaveDB *gorm.DB, tracer *apm.Tracer) *gin.Engine {
+	// Middleware
+	router.Use(apmgin.Middleware(router, apmgin.WithTracer(tracer))) // APM gin middleware
 
-	// swagger
+	// Swagger
 	// docs.SwaggerInfo.BasePath = fmt.Sprintf("/api/%s", viper.GetString("server.apiVersion"))
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
-	// user handler
-	userHandler := userHdl.NewUserHandler(userSrv.NewUserService(
-		userRepo.NewUserQueryRepo(db),
-		userRepo.NewUserCommandRepo(db),
-	))
+	// User handler with master and slave DBs
+	userHandler := userHdl.NewUserHandler(
+		userSrv.NewUserService(
+			userRepo.NewUserQueryRepo(slaveDB),   // Read operations
+			userRepo.NewUserCommandRepo(masterDB), // Write operations
+		),
+	)
 
 	// v1 group
 	v1 := router.Group(fmt.Sprintf("/api/%s", viper.GetString("server.apiVersion")))

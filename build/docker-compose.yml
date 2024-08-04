@@ -16,7 +16,7 @@ services:
     #         - mynetwork
 
     mysql-master:
-        image: mysql:latest
+        image: mysql:8.0
         container_name: mysql-master
         restart: always
         environment:
@@ -25,38 +25,38 @@ services:
         ports:
             - '3306:3306'
         healthcheck:
-            test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-P', '3306', '-u', 'root', '-p$MYSQL_ROOT_PASSWORD']
+            test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-P', '3306', '-u', 'root', '-proot_password']
             interval: 10s
             timeout: 5s
             retries: 3
         networks:
             - mynetwork
-        # volumes:
-        #     - ./mysql-master-data:/var/lib/mysql
+        volumes:
+            - ./mysql/master/master.cnf:/etc/mysql/my.cnf
+            - ./mysql/master/master-init.sql:/docker-entrypoint-initdb.d/init.sql
 
     mysql-slave:
-        image: mysql:latest
+        image: mysql:8.0
         container_name: mysql-slave
         restart: always
         environment:
             MYSQL_ROOT_PASSWORD: root_password
             MYSQL_DATABASE: banking
-            MYSQL_MASTER_HOST: mysql-master
-            MYSQL_MASTER_PORT: 3306
-            MYSQL_MASTER_ROOT_PASSWORD: root_password
+        ports:
+            - '3307:3306'
+        depends_on:
+            mysql-master:
+                condition: service_healthy
         healthcheck:
-            test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-P', '3306', '-u', 'root', '-p$MYSQL_ROOT_PASSWORD']
+            test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-P', '3306', '-u', 'root', '-proot_password']
             interval: 10s
             timeout: 5s
             retries: 3
         networks:
             - mynetwork
-        # volumes:
-        #     - ./mysql-slave-data:/var/lib/mysql
-
-    # volumes:
-    #     mysql-master-data:
-    #     mysql-slave-data:
+        volumes:
+            - ./mysql/slave/slave.cnf:/etc/mysql/my.cnf
+            - ./mysql/slave/slave-init.sh:/docker-entrypoint-initdb.d/init.sh
 
     prometheus:
         image: prom/prometheus

@@ -1,0 +1,10 @@
+[mysqld]
+bind-address = 0.0.0.0
+server-id = 2
+relay_log = /var/lib/mysql/mysql-relay-bin.log
+log_bin = /var/lib/mysql/mysql-bin.log
+read_only = 1
+super_read_only = 0  # Disable super_read_only, re-enable after initialization
+sync_binlog = 1
+innodb_flush_log_at_trx_commit = 1
+!includedir /etc/mysql/conf.d/

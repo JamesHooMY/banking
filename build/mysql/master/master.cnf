@@ -1,0 +1,8 @@
+[mysqld]
+bind-address = 0.0.0.0
+server-id = 1
+log_bin = /var/lib/mysql/mysql-bin.log
+binlog_do_db = banking
+sync_binlog = 1
+innodb_flush_log_at_trx_commit = 1
+!includedir /etc/mysql/conf.d/
