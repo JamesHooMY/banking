@@ -2,6 +2,7 @@
 .vscode
 
 config/config.yaml
+config/config.docker.yaml
 log/*.log
 vendor
 

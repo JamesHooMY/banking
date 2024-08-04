@@ -1,19 +1,32 @@
 version: '3.1'
 
 services:
-    # myapp:
-    #     build:
-    #         context: ../
-    #         dockerfile: Dockerfile
-    #     ports:
-    #         - '8080:8080'
-    #     depends_on:
-    #         mysql-master:
-    #             condition: service_healthy
-    #         mysql-slave:
-    #             condition: service_healthy
-    #     networks:
-    #         - mynetwork
+    myapp:
+        build:
+            context: ../
+            dockerfile: Dockerfile
+        container_name: myapp
+        ports:
+            - '8080:8080'
+        environment:
+            APP_ENV: docker
+        depends_on:
+            mysql-master:
+                condition: service_healthy
+            mysql-slave:
+                condition: service_healthy
+            prometheus:
+                condition: service_healthy
+            grafana:
+                condition: service_healthy
+            elasticsearch:
+                condition: service_healthy
+            kibana:
+                condition: service_healthy
+            apm_server:
+                condition: service_healthy
+        networks:
+            - mynetwork
 
     mysql-master:
         image: mysql:8.0
@@ -65,7 +78,7 @@ services:
         ports:
             - '9090:9090'
         healthcheck:
-            test: ['CMD', 'curl', '-f', 'http://localhost:9090/-/healthy']
+            test: ['CMD', 'nc', '-z', 'localhost', '9090']
             interval: 30s
             timeout: 10s
             retries: 3
@@ -133,6 +146,13 @@ services:
             - OUTPUT_ELASTICSEARCH_ENABLED=true
             - OUTPUT_ELASTICSEARCH_HOSTS=[ "elasticsearch:9200" ]
             - SECRET_TOKEN=apmToken
+        depends_on:
+            - elasticsearch
+        healthcheck:
+            test: ['CMD', 'curl', '-f', 'http://localhost:8200']
+            interval: 10s
+            timeout: 5s
+            retries: 3
         networks:
             - mynetwork
 

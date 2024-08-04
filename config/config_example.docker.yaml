@@ -1,0 +1,38 @@
+server:
+    runMode: debug # Set this to "release" for production
+    httpPort: 8080
+    shutdownTimeout: 1 # second
+    apiVersion: v1
+
+mysql:
+    master:
+        host: mysql-master:3306
+        username: root
+        password: root_password
+        dbName: banking
+    slave:
+        host: mysql-slave:3306
+        username: root
+        password: root_password
+        dbName: banking
+    tablePrefix: banking_
+    maxIdleConns: 10
+    maxOpenConns: 100
+    maxLifetime: 2
+
+log:
+    maxSize: 10 # megabytes
+    maxBackups: 10 # files
+    maxAge: 90 # days
+    compress: false
+
+apm:
+    serviceName: banking
+    serverUrl: http://apm_server:8200
+    secretToken: 'apmToken'
+
+elasticsearch:
+    url: "http://elasticsearch:9200"
+    username: ""
+    password: ""
+    index: "logs-index"

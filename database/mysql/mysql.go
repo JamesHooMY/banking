@@ -88,7 +88,6 @@ func initDB(ctx context.Context, dsn string, isMaster bool) error {
 		defer cancel()
 		return sqlDB.PingContext(ctxWT)
 	}, 5, 5*time.Second)
-
 	if err != nil {
 		return err
 	}

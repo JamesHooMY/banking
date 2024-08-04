@@ -56,7 +56,15 @@ func init() {
 }
 
 func initConfig() {
-	viper.SetConfigName("config")
+	// Determine the environment
+	env := os.Getenv("APP_ENV") // e.g. "docker"
+
+	configFile := "config"
+	if env != "" {
+		configFile = fmt.Sprintf("%s.%s", configFile, env)
+	}
+
+	viper.SetConfigName(configFile)
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath("./config")
 	if err := viper.ReadInConfig(); err != nil {
