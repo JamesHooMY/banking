@@ -25,6 +25,11 @@ services:
                 condition: service_healthy
             apm_server:
                 condition: service_healthy
+        healthcheck:
+            test: ['CMD', 'nc', '-z', 'localhost', '8080']
+            interval: 10s
+            timeout: 5s
+            retries: 3
         networks:
             - mynetwork
 
@@ -153,6 +158,24 @@ services:
             interval: 10s
             timeout: 5s
             retries: 3
+        networks:
+            - mynetwork
+
+    k6:
+        build:
+            context: ./k6
+            dockerfile: Dockerfile
+        container_name: k6
+        depends_on:
+            myapp:
+                condition: service_healthy
+        environment:
+            - BASE_URL=http://myapp:8080/api/v1
+        user: root
+        volumes:
+            - ./k6/scripts:/scripts
+            - ./k6/config.json:/config.json
+            - ./k6/results:/results
         networks:
             - mynetwork
 
