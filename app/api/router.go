@@ -16,6 +16,7 @@ import (
 	"go.elastic.co/apm/module/apmgin/v2"
 	"go.elastic.co/apm/v2"
 	"gorm.io/gorm"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func InitRouter(router *gin.Engine, masterDB *gorm.DB, slaveDB *gorm.DB, tracer *apm.Tracer) *gin.Engine {
@@ -25,6 +26,9 @@ func InitRouter(router *gin.Engine, masterDB *gorm.DB, slaveDB *gorm.DB, tracer 
 	// Swagger
 	// docs.SwaggerInfo.BasePath = fmt.Sprintf("/api/%s", viper.GetString("server.apiVersion"))
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+
+	// Prometheus metrics endpoint
+	router.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
 	// User handler with master and slave DBs
 	userHandler := userHdl.NewUserHandler(
