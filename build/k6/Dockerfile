@@ -1,4 +1,4 @@
-FROM loadimpact/k6
+FROM grafana/k6
 
 COPY ./scripts /scripts
 COPY ./config.json /config.json
