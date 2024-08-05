@@ -35,7 +35,7 @@ pprof_mem:
 	curl -o ./pprof/mem.pprof http://localhost:6060/debug/pprof/heap?seconds=30
 
 pprof_flame:
-    go tool pprof -svg ./pprof/cpu.pprof > ./pprof/cpu.svg
+	go tool pprof -svg ./pprof/cpu.pprof > ./pprof/cpu.svg
 	go tool pprof -svg ./pprof/mem.pprof > ./pprof/mem.svg
 
 pprof_top:
