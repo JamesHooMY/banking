@@ -15,52 +15,64 @@ import (
 	"gorm.io/gorm/schema"
 )
 
-var (
-	masterDB *gorm.DB
-	slaveDB  *gorm.DB
-)
+type MySQL struct {
+	Master *Master
+	Slave  *Slave
+}
 
-func InitMySQL(ctx context.Context) error {
-	// Initialize master DB
-	masterDSN := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+type Master struct {
+	DB *gorm.DB
+}
+
+type Slave struct {
+	DB *gorm.DB
+}
+
+func NewMasterDB(ctx context.Context) (*Master, error) {
+	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		viper.GetString("mysql.master.username"),
 		viper.GetString("mysql.master.password"),
 		viper.GetString("mysql.master.host"),
 		viper.GetString("mysql.master.dbName"))
 
-	if err := initDB(ctx, masterDSN, true); err != nil {
-		return err
+	db, err := initDB(ctx, dsn)
+	if err != nil {
+		return nil, err
 	}
 
-	// Initialize slave DB
-	slaveDSN := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+	// Auto migrate on master
+	if err := db.AutoMigrate(
+		&model.User{},
+		&model.Transaction{},
+	); err != nil {
+		return nil, err
+	}
+
+	// Seed User data
+	seedUsers(db)
+
+	return &Master{DB: db}, nil
+}
+
+func NewSlaveDB(ctx context.Context) (*Slave, error) {
+	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		viper.GetString("mysql.slave.username"),
 		viper.GetString("mysql.slave.password"),
 		viper.GetString("mysql.slave.host"),
 		viper.GetString("mysql.slave.dbName"))
 
-	if err := initDB(ctx, slaveDSN, false); err != nil {
-		return err
+	db, err := initDB(ctx, dsn)
+	if err != nil {
+		return nil, err
 	}
 
-	// Auto migrate on master
-	if err := masterDB.AutoMigrate(
-		&model.User{},
-		&model.Transaction{},
-	); err != nil {
-		return err
-	}
-
-	// Seed User data
-	seedUsers(masterDB)
-
-	return nil
+	return &Slave{DB: db}, nil
 }
 
-func initDB(ctx context.Context, dsn string, isMaster bool) error {
+func initDB(ctx context.Context, dsn string) (*gorm.DB, error) {
 	location, err := time.LoadLocation("UTC")
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	var db *gorm.DB
@@ -89,16 +101,10 @@ func initDB(ctx context.Context, dsn string, isMaster bool) error {
 		return sqlDB.PingContext(ctxWT)
 	}, 5, 5*time.Second)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	if isMaster {
-		masterDB = db
-	} else {
-		slaveDB = db
-	}
-
-	return nil
+	return db, nil
 }
 
 func retry(ctx context.Context, action func() error, attempts int, sleep time.Duration) error {
@@ -135,14 +141,4 @@ func seedUsers(db *gorm.DB) {
 	for _, user := range users {
 		db.Create(&user)
 	}
-}
-
-// GetMasterDB returns the master database connection
-func GetMasterDB() *gorm.DB {
-	return masterDB
-}
-
-// GetSlaveDB returns the slave database connection
-func GetSlaveDB() *gorm.DB {
-	return slaveDB
 }

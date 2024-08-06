@@ -59,7 +59,8 @@ func RunApiserver(cmd *cobra.Command, _ []string) {
 	}
 
 	// Init MySQL
-	if err := mysql.InitMySQL(cmd.Context()); err != nil {
+	mysql, err := mysql.InitMySQL(cmd.Context())
+	if err != nil {
 		errMsg := fmt.Sprintf("Init MySQL error: %s\n", err)
 		global.Logger.Error(errMsg)
 		panic(errMsg)
@@ -67,7 +68,7 @@ func RunApiserver(cmd *cobra.Command, _ []string) {
 
 	// init router
 	engine := gin.Default()
-	r := router.InitRouter(engine, mysql.GetMasterDB(), mysql.GetSlaveDB(), tracer)
+	r := router.InitRouter(engine, mysql.Master.DB, mysql.Slave.DB, tracer)
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%d", viper.GetInt("server.httpPort")),
 		Handler: r,

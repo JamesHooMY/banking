@@ -6,6 +6,7 @@ require (
 	github.com/elastic/go-elasticsearch/v7 v7.17.10
 	github.com/gin-gonic/gin v1.9.1
 	github.com/golang/mock v1.6.0
+	github.com/google/wire v0.6.0
 	github.com/ory/dockertest/v3 v3.10.0
 	github.com/prometheus/client_golang v1.19.1
 	github.com/shopspring/decimal v1.3.1
