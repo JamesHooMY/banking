@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"banking/model"
+	mysqlModel "banking/model/mysql"
 
 	"github.com/shopspring/decimal"
 	"github.com/spf13/viper"
@@ -42,8 +42,8 @@ func NewMasterDB(ctx context.Context) (*Master, error) {
 
 	// Auto migrate on master
 	if err := db.AutoMigrate(
-		&model.User{},
-		&model.Transaction{},
+		&mysqlModel.User{},
+		&mysqlModel.Transaction{},
 	); err != nil {
 		return nil, err
 	}
@@ -124,7 +124,7 @@ func retry(ctx context.Context, action func() error, attempts int, sleep time.Du
 
 // Function to seed User data
 func seedUsers(db *gorm.DB) {
-	users := []*model.User{
+	users := []*mysqlModel.User{
 		{
 			Name:    "User1",
 			Balance: decimal.NewFromFloat(100.00),

@@ -5,12 +5,11 @@
 package mock
 
 import (
-	model "banking/model"
+	mysql "banking/model/mysql"
 	context "context"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	decimal "github.com/shopspring/decimal"
 )
 
 // MockIUserService is a mock of IUserService interface.
@@ -37,7 +36,7 @@ func (m *MockIUserService) EXPECT() *MockIUserServiceMockRecorder {
 }
 
 // CreateUser mocks base method.
-func (m *MockIUserService) CreateUser(ctx context.Context, user *model.User) error {
+func (m *MockIUserService) CreateUser(ctx context.Context, user *mysql.User) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateUser", ctx, user)
 	ret0, _ := ret[0].(error)
@@ -50,26 +49,11 @@ func (mr *MockIUserServiceMockRecorder) CreateUser(ctx, user interface{}) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUser", reflect.TypeOf((*MockIUserService)(nil).CreateUser), ctx, user)
 }
 
-// Deposit mocks base method.
-func (m *MockIUserService) Deposit(ctx context.Context, userID uint, amount decimal.Decimal) (*model.User, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Deposit", ctx, userID, amount)
-	ret0, _ := ret[0].(*model.User)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Deposit indicates an expected call of Deposit.
-func (mr *MockIUserServiceMockRecorder) Deposit(ctx, userID, amount interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Deposit", reflect.TypeOf((*MockIUserService)(nil).Deposit), ctx, userID, amount)
-}
-
 // GetUser mocks base method.
-func (m *MockIUserService) GetUser(ctx context.Context, userID uint) (*model.User, error) {
+func (m *MockIUserService) GetUser(ctx context.Context, userID uint) (*mysql.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUser", ctx, userID)
-	ret0, _ := ret[0].(*model.User)
+	ret0, _ := ret[0].(*mysql.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -81,10 +65,10 @@ func (mr *MockIUserServiceMockRecorder) GetUser(ctx, userID interface{}) *gomock
 }
 
 // GetUsers mocks base method.
-func (m *MockIUserService) GetUsers(ctx context.Context) ([]*model.User, error) {
+func (m *MockIUserService) GetUsers(ctx context.Context) ([]*mysql.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUsers", ctx)
-	ret0, _ := ret[0].([]*model.User)
+	ret0, _ := ret[0].([]*mysql.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -93,36 +77,6 @@ func (m *MockIUserService) GetUsers(ctx context.Context) ([]*model.User, error) 
 func (mr *MockIUserServiceMockRecorder) GetUsers(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUsers", reflect.TypeOf((*MockIUserService)(nil).GetUsers), ctx)
-}
-
-// Transfer mocks base method.
-func (m *MockIUserService) Transfer(ctx context.Context, fromUserID, toUserID uint, amount decimal.Decimal) (*model.User, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Transfer", ctx, fromUserID, toUserID, amount)
-	ret0, _ := ret[0].(*model.User)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Transfer indicates an expected call of Transfer.
-func (mr *MockIUserServiceMockRecorder) Transfer(ctx, fromUserID, toUserID, amount interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Transfer", reflect.TypeOf((*MockIUserService)(nil).Transfer), ctx, fromUserID, toUserID, amount)
-}
-
-// Withdraw mocks base method.
-func (m *MockIUserService) Withdraw(ctx context.Context, userID uint, amount decimal.Decimal) (*model.User, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Withdraw", ctx, userID, amount)
-	ret0, _ := ret[0].(*model.User)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Withdraw indicates an expected call of Withdraw.
-func (mr *MockIUserServiceMockRecorder) Withdraw(ctx, userID, amount interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Withdraw", reflect.TypeOf((*MockIUserService)(nil).Withdraw), ctx, userID, amount)
 }
 
 // MockIUserQueryRepo is a mock of IUserQueryRepo interface.
@@ -149,10 +103,10 @@ func (m *MockIUserQueryRepo) EXPECT() *MockIUserQueryRepoMockRecorder {
 }
 
 // GetUser mocks base method.
-func (m *MockIUserQueryRepo) GetUser(ctx context.Context, userID uint) (*model.User, error) {
+func (m *MockIUserQueryRepo) GetUser(ctx context.Context, userID uint) (*mysql.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUser", ctx, userID)
-	ret0, _ := ret[0].(*model.User)
+	ret0, _ := ret[0].(*mysql.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -164,10 +118,10 @@ func (mr *MockIUserQueryRepoMockRecorder) GetUser(ctx, userID interface{}) *gomo
 }
 
 // GetUsers mocks base method.
-func (m *MockIUserQueryRepo) GetUsers(ctx context.Context) ([]*model.User, error) {
+func (m *MockIUserQueryRepo) GetUsers(ctx context.Context) ([]*mysql.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUsers", ctx)
-	ret0, _ := ret[0].([]*model.User)
+	ret0, _ := ret[0].([]*mysql.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -202,7 +156,7 @@ func (m *MockIUserCommandRepo) EXPECT() *MockIUserCommandRepoMockRecorder {
 }
 
 // CreateUser mocks base method.
-func (m *MockIUserCommandRepo) CreateUser(ctx context.Context, user *model.User) error {
+func (m *MockIUserCommandRepo) CreateUser(ctx context.Context, user *mysql.User) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateUser", ctx, user)
 	ret0, _ := ret[0].(error)
@@ -213,49 +167,4 @@ func (m *MockIUserCommandRepo) CreateUser(ctx context.Context, user *model.User)
 func (mr *MockIUserCommandRepoMockRecorder) CreateUser(ctx, user interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUser", reflect.TypeOf((*MockIUserCommandRepo)(nil).CreateUser), ctx, user)
-}
-
-// Deposit mocks base method.
-func (m *MockIUserCommandRepo) Deposit(ctx context.Context, userID uint, amount decimal.Decimal) (*model.User, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Deposit", ctx, userID, amount)
-	ret0, _ := ret[0].(*model.User)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Deposit indicates an expected call of Deposit.
-func (mr *MockIUserCommandRepoMockRecorder) Deposit(ctx, userID, amount interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Deposit", reflect.TypeOf((*MockIUserCommandRepo)(nil).Deposit), ctx, userID, amount)
-}
-
-// Transfer mocks base method.
-func (m *MockIUserCommandRepo) Transfer(ctx context.Context, fromUserID, toUserID uint, amount decimal.Decimal) (*model.User, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Transfer", ctx, fromUserID, toUserID, amount)
-	ret0, _ := ret[0].(*model.User)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Transfer indicates an expected call of Transfer.
-func (mr *MockIUserCommandRepoMockRecorder) Transfer(ctx, fromUserID, toUserID, amount interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Transfer", reflect.TypeOf((*MockIUserCommandRepo)(nil).Transfer), ctx, fromUserID, toUserID, amount)
-}
-
-// Withdraw mocks base method.
-func (m *MockIUserCommandRepo) Withdraw(ctx context.Context, userID uint, amount decimal.Decimal) (*model.User, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Withdraw", ctx, userID, amount)
-	ret0, _ := ret[0].(*model.User)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Withdraw indicates an expected call of Withdraw.
-func (mr *MockIUserCommandRepoMockRecorder) Withdraw(ctx, userID, amount interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Withdraw", reflect.TypeOf((*MockIUserCommandRepo)(nil).Withdraw), ctx, userID, amount)
 }

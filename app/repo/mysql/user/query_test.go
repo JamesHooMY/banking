@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"banking/app/repo/mysql/user"
-	"banking/model"
+	userRepo "banking/app/repo/mysql/user"
+	userModel "banking/model/mysql"
 
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
@@ -13,19 +13,19 @@ import (
 )
 
 func Test_GetUser(t *testing.T) {
-	if err := mysqlDB.Migrator().DropTable(&model.User{}); err != nil {
+	if err := mysqlTestDB.Migrator().DropTable(&userModel.User{}); err != nil {
 		t.Fatal(err)
 	}
-	if err := mysqlDB.AutoMigrate(&model.User{}); err != nil {
+	if err := mysqlTestDB.AutoMigrate(&userModel.User{}); err != nil {
 		t.Fatal(err)
 	}
-	mysqlDB.Create(&model.User{
+	mysqlTestDB.Create(&userModel.User{
 		Model:   gorm.Model{ID: 1},
 		Name:    "user1",
 		Balance: decimal.NewFromFloat(100),
 	})
 
-	userQueryRepo := user.NewUserQueryRepo(mysqlDB)
+	userQueryRepo := userRepo.NewUserQueryRepo(mysqlTestDB)
 	user, err := userQueryRepo.GetUser(context.Background(), 1)
 
 	assert.Nil(t, err)
@@ -34,13 +34,13 @@ func Test_GetUser(t *testing.T) {
 }
 
 func Test_GetUsers(t *testing.T) {
-	if err := mysqlDB.Migrator().DropTable(&model.User{}); err != nil {
+	if err := mysqlTestDB.Migrator().DropTable(&userModel.User{}); err != nil {
 		t.Fatal(err)
 	}
-	if err := mysqlDB.AutoMigrate(&model.User{}); err != nil {
+	if err := mysqlTestDB.AutoMigrate(&userModel.User{}); err != nil {
 		t.Fatal(err)
 	}
-	mysqlDB.CreateInBatches([]*model.User{
+	mysqlTestDB.CreateInBatches([]*userModel.User{
 		{
 			Model:   gorm.Model{ID: 1},
 			Name:    "user1",
@@ -53,7 +53,7 @@ func Test_GetUsers(t *testing.T) {
 		},
 	}, 2)
 
-	userQueryRepo := user.NewUserQueryRepo(mysqlDB)
+	userQueryRepo := userRepo.NewUserQueryRepo(mysqlTestDB)
 	users, err := userQueryRepo.GetUsers(context.Background())
 
 	assert.Nil(t, err)

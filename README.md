@@ -15,46 +15,78 @@
 banking/
 ├─ app/
 │  ├─ api/
-│  │  ├─ v1/
-│  │  │  ├─ handler/
-│  │  │  │  ├─ user/
-│  │  │  │  │  ├─ user.go
-│  │  │  │  │  ├─ user_test.go
-│  │  │  ├─ response.go
+│  │  ├─ restful/
+│  │  ├─-├─ v1/
+│  │  │  |  ├─ handler/
+│  │  │  │  |  ├─ user/
+│  │  │  │  │  |  ├─ user.go
+│  │  │  │  │  |  ├─ user_test.go
+│  │  │  |  ├─ response.go
 │  │  ├─ router.go
 │  ├─ repo/
 │  │  ├─ mysql/
+│  │  │  ├─ transaction/
+│  │  │  │  ├─ command.go
+│  │  │  │  ├─ command_test.go
+│  │  │  │  ├─ errorMsg.go
+│  │  │  │  ├─ setup_mysql_test.go
 │  │  │  ├─ user/
 │  │  │  │  ├─ query.go
 │  │  │  │  ├─ query_test.go
 │  │  │  │  ├─ command.go
 │  │  │  │  ├─ command_test.go
 │  │  │  │  ├─ errorMsg.go
-│  │  │  │  ├─ setup_test.go
+│  │  │  │  ├─ setup_mysql_test.go
 │  ├─ service/
+│  │  ├─ transaction/
+│  │  │  ├─ transaction.go
 │  │  ├─ user/
-│  │  │  ├─ mock/
-│  │  │  │  ├─ user.go
 │  │  │  ├─ user.go
 ├─ build/
+│  ├─ k6/
+│  │  ├─ scripts/
+│  │  │  ├─ get-users.js
+│  │  ├─ .env
+│  │  ├─ config.json
+│  │  ├─ Dockerfile
+│  │  ├─ README.md
+│  ├─ mysql/
+│  │  ├─ master/
+│  │  │  ├─ master-init.sql
+│  │  │  ├─ master.cnf
+│  │  ├─ slave/
+│  │  │  ├─ slave-init.sql
+│  │  │  ├─ slave.cnf
+│  ├─ prometheus/
+│  │  ├─ prometheus.yml
 │  ├─ docker-compose.yml
 ├─ cmd/
 │  ├─ apiserver.go
 │  ├─ root.go
 ├─ config/
-│  ├─ config.example.yaml
+│  ├─ config.example.yaml # remove .example to use
+│  ├─ config.example.docker.yaml # remove .example to use
 ├─ database/
 │  ├─ mysql/
 │  │  ├─ mysql.go
+│  │  ├─ wire_gen.go
+│  │  ├─ wire.go
 ├─ docs/
 │  ├─ docs.go
 │  ├─ swagger.json
 │  ├─ swagger.yaml
+├─ domain/
+|  ├─ mock/
+│  |  ├─ transaction.go
+│  |  ├─ user.go
+│  ├─ transaction.go
+│  ├─ user.go
 ├─ global/
 │  ├─ global.go
 ├─ log/
 │  ├─ logger.go
 ├─ model/
+│  ├─ transaction.go
 │  ├─ user.go
 ├─ .gitignore
 ├─ Dockerfile

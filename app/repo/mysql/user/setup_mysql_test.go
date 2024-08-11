@@ -16,11 +16,11 @@ import (
 	"gorm.io/gorm/schema"
 )
 
-var mysqlDB *gorm.DB
+var mysqlTestDB *gorm.DB
 
 func TestMain(m *testing.M) {
 	pool, resource, db := InitialDockerMySQL()
-	mysqlDB = db
+	mysqlTestDB = db
 
 	code := m.Run()
 
@@ -44,7 +44,7 @@ func InitialDockerMySQL() (
 	}
 
 	options := &dockertest.RunOptions{
-		Name:       "mysql_test",
+		Name:       "mysql_user_test",
 		Repository: "mysql",
 		Tag:        "5.7",
 		Env: []string{

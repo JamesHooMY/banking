@@ -8,9 +8,9 @@ import (
 	"testing"
 
 	router "banking/app/api"
-	userHdl "banking/app/api/v1/handler/user"
-	"banking/app/service/user/mock"
-	"banking/model"
+	userHdl "banking/app/api/restful/v1/handler/user"
+	domainMock "banking/domain/mock"
+	mysqlModel "banking/model/mysql"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
@@ -19,7 +19,7 @@ import (
 	"go.elastic.co/apm/v2"
 )
 
-var mockUserService *mock.MockIUserService
+var mockUserService *domainMock.MockIUserService
 
 func initialUserHandler(t *testing.T) {
 	gin.SetMode(gin.TestMode)
@@ -29,14 +29,14 @@ func initialUserHandler(t *testing.T) {
 	router.InitRouter(gin.Default(), nil, nil, tracer)
 
 	ctrl := gomock.NewController(t)
-	mockUserService = mock.NewMockIUserService(ctrl)
+	mockUserService = domainMock.NewMockIUserService(ctrl)
 }
 
 func Test_CreateUser(t *testing.T) {
 	initialUserHandler(t)
 
 	// variables
-	user := &model.User{
+	user := &mysqlModel.User{
 		Name:    "user1",
 		Balance: decimal.NewFromFloat(0),
 	}

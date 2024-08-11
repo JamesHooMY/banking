@@ -168,7 +168,7 @@ services:
             dockerfile: Dockerfile
         container_name: k6
         ports:
-            - "6565:6565"
+            - '6565:6565'
         depends_on:
             myapp:
                 condition: service_healthy

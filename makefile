@@ -41,3 +41,6 @@ pprof_flame:
 pprof_top:
 	go tool pprof -top ./pprof/cpu.pprof | head -n 20 > ./pprof/top_cpu.txt
 	go tool pprof -top ./pprof/mem.pprof | head -n 20 > ./pprof/top_mem.txt
+
+wire:
+	wire ./...
