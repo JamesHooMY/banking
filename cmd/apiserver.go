@@ -15,6 +15,7 @@ import (
 
 	router "banking/app/api"
 	"banking/database/mysql"
+	"banking/database/redis"
 	"banking/global"
 	logger "banking/log"
 
@@ -66,9 +67,17 @@ func RunApiserver(cmd *cobra.Command, _ []string) {
 		panic(errMsg)
 	}
 
+	// Init Redis
+	redis, err := redis.InitRedis(cmd.Context())
+	if err != nil {
+		errMsg := fmt.Sprintf("Init Redis error: %s\n", err)
+		global.Logger.Error(errMsg)
+		panic(errMsg)
+	}
+
 	// init router
 	engine := gin.Default()
-	r := router.InitRouter(engine, mysql.Master.DB, mysql.Slave.DB, tracer)
+	r := router.InitRouter(engine, mysql.Master.DB, mysql.Slave.DB, redis.Client, tracer)
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%d", viper.GetInt("server.httpPort")),
 		Handler: r,

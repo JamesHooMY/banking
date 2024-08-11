@@ -35,7 +35,7 @@ func NewMasterDB(ctx context.Context) (*Master, error) {
 		viper.GetString("mysql.master.host"),
 		viper.GetString("mysql.master.dbName"))
 
-	db, err := initDB(ctx, dsn)
+	db, err := initMySQL(ctx, dsn)
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +61,7 @@ func NewSlaveDB(ctx context.Context) (*Slave, error) {
 		viper.GetString("mysql.slave.host"),
 		viper.GetString("mysql.slave.dbName"))
 
-	db, err := initDB(ctx, dsn)
+	db, err := initMySQL(ctx, dsn)
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +69,7 @@ func NewSlaveDB(ctx context.Context) (*Slave, error) {
 	return &Slave{DB: db}, nil
 }
 
-func initDB(ctx context.Context, dsn string) (*gorm.DB, error) {
+func initMySQL(ctx context.Context, dsn string) (*gorm.DB, error) {
 	location, err := time.LoadLocation("UTC")
 	if err != nil {
 		return nil, err
@@ -138,7 +138,18 @@ func seedUsers(db *gorm.DB) {
 			Balance: decimal.NewFromFloat(300.00),
 		},
 	}
+
 	for _, user := range users {
-		db.Create(&user)
+		var existingUser mysqlModel.User
+		result := db.Where("name = ?", user.Name).First(&existingUser)
+
+		// Only create the user if it does not already exist
+		if result.Error != nil && result.Error == gorm.ErrRecordNotFound {
+			newUser := mysqlModel.User{
+				Name:    user.Name,
+				Balance: user.Balance,
+			}
+			db.Create(&newUser)
+		}
 	}
 }

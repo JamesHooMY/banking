@@ -26,7 +26,7 @@ func initialUserHandler(t *testing.T) {
 
 	// Initialize APM tracer
 	tracer := apm.DefaultTracer()
-	router.InitRouter(gin.Default(), nil, nil, tracer)
+	router.InitRouter(gin.Default(), nil, nil, nil, tracer)
 
 	ctrl := gomock.NewController(t)
 	mockUserService = domainMock.NewMockIUserService(ctrl)

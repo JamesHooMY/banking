@@ -16,12 +16,18 @@ type ITransactionHandler interface {
 	Transfer() gin.HandlerFunc
 	Deposit() gin.HandlerFunc
 	Withdraw() gin.HandlerFunc
+	GetTransactions() gin.HandlerFunc
 }
 
 type ITransactionService interface {
 	Transfer(ctx context.Context, fromUserID, toUserID uint, amount decimal.Decimal) (user *mysqlModel.User, err error)
 	Deposit(ctx context.Context, userID uint, amount decimal.Decimal) (user *mysqlModel.User, err error)
 	Withdraw(ctx context.Context, userID uint, amount decimal.Decimal) (user *mysqlModel.User, err error)
+	GetTransactions(ctx context.Context) (transactions []*mysqlModel.Transaction, err error)
+}
+
+type ITransactionQueryRepo interface {
+	GetTransactions(ctx context.Context) (transactions []*mysqlModel.Transaction, err error)
 }
 
 type ITransactionCommandRepo interface {

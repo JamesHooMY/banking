@@ -11,12 +11,14 @@ import (
 )
 
 type transactionService struct {
-	transactionCmdRepo domain.ITransactionCommandRepo
+	transactionCmdRepo   domain.ITransactionCommandRepo
+	transactionQueryRepo domain.ITransactionQueryRepo
 }
 
-func NewTransactionService(transactionCmdRepo domain.ITransactionCommandRepo) domain.ITransactionService {
+func NewTransactionService(transactionCmdRepo domain.ITransactionCommandRepo, transactionQueryRepo domain.ITransactionQueryRepo) domain.ITransactionService {
 	return &transactionService{
-		transactionCmdRepo: transactionCmdRepo,
+		transactionCmdRepo:   transactionCmdRepo,
+		transactionQueryRepo: transactionQueryRepo,
 	}
 }
 
@@ -39,4 +41,11 @@ func (s *transactionService) Withdraw(ctx context.Context, userID uint, amount d
 	defer span.End()
 
 	return s.transactionCmdRepo.Withdraw(ctx, userID, amount)
+}
+
+func (s *transactionService) GetTransactions(ctx context.Context) (transactions []*mysqlModel.Transaction, err error) {
+	span, ctx := apm.StartSpan(ctx, "userService.GetTransactions", "service")
+	defer span.End()
+
+	return s.transactionQueryRepo.GetTransactions(ctx)
 }

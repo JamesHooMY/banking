@@ -12,6 +12,7 @@ import (
 	_ "banking/docs"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis/v8"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/viper"
 	swaggerfiles "github.com/swaggo/files"
@@ -21,7 +22,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func InitRouter(router *gin.Engine, masterDB *gorm.DB, slaveDB *gorm.DB, tracer *apm.Tracer) *gin.Engine {
+func InitRouter(router *gin.Engine, masterDB *gorm.DB, slaveDB *gorm.DB, redisClient *redis.ClusterClient, tracer *apm.Tracer) *gin.Engine {
 	// Middleware
 	router.Use(apmgin.Middleware(router, apmgin.WithTracer(tracer))) // APM gin middleware
 
@@ -35,8 +36,8 @@ func InitRouter(router *gin.Engine, masterDB *gorm.DB, slaveDB *gorm.DB, tracer 
 	// User handler with master and slave DBs
 	userHandler := userHdl.NewUserHandler(
 		userSrv.NewUserService(
-			userRepo.NewUserQueryRepo(slaveDB),    // Read operations
 			userRepo.NewUserCommandRepo(masterDB), // Write operations
+			userRepo.NewUserQueryRepo(slaveDB),    // Read operations
 		),
 	)
 
@@ -44,6 +45,7 @@ func InitRouter(router *gin.Engine, masterDB *gorm.DB, slaveDB *gorm.DB, tracer 
 	transactionHandler := transactionHdl.NewTransactionHandler(
 		transactionSrv.NewTransactionService(
 			transactionRepo.NewTransactionCommandRepo(masterDB), // Write operations
+			transactionRepo.NewTransactionQueryRepo(slaveDB),    // Read operations
 		),
 	)
 
@@ -55,9 +57,12 @@ func InitRouter(router *gin.Engine, masterDB *gorm.DB, slaveDB *gorm.DB, tracer 
 	user.POST("", userHandler.CreateUser())
 	user.GET("", userHandler.GetUsers())
 	user.GET("/:id", userHandler.GetUser())
-	user.POST("/transfer", transactionHandler.Transfer())
-	user.POST("/deposit", transactionHandler.Deposit())
-	user.POST("/withdraw", transactionHandler.Withdraw())
+
+	transaction := v1.Group("/transaction")
+	transaction.POST("/transfer", transactionHandler.Transfer())
+	transaction.POST("/deposit", transactionHandler.Deposit())
+	transaction.POST("/withdraw", transactionHandler.Withdraw())
+	transaction.GET("", transactionHandler.GetTransactions())
 
 	return router
 }

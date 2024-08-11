@@ -19,7 +19,7 @@ type userService struct {
 }
 
 // add database repo here
-func NewUserService(userQryRepo domain.IUserQueryRepo, userCmdRepo domain.IUserCommandRepo) domain.IUserService {
+func NewUserService(userCmdRepo domain.IUserCommandRepo, userQryRepo domain.IUserQueryRepo) domain.IUserService {
 	return &userService{
 		userQryRepo: userQryRepo,
 		userCmdRepo: userCmdRepo,

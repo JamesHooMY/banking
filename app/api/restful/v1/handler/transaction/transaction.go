@@ -157,3 +157,26 @@ func (h *TransactionHandler) Withdraw() gin.HandlerFunc {
 		})
 	}
 }
+
+func (h *TransactionHandler) GetTransactions() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		span, ctx := apm.StartSpan(c.Request.Context(), "TransactionHandler.GetTransactions", "handler")
+		defer span.End()
+
+		transactions, err := h.TransactionService.GetTransactions(ctx)
+		if err != nil {
+			apm.CaptureError(ctx, err).Send()
+			c.AbortWithStatusJSON(http.StatusInternalServerError, &v1.ErrResponse{
+				Msg: err.Error(),
+			})
+			return
+		}
+
+		global.Logger.With(apmzap.TraceContext(ctx)).Info(fmt.Sprintf("[GetTransactions]: transactions: %v", transactions))
+
+		c.JSON(http.StatusOK, &v1.ErrResponse{
+			Data: transactions,
+			Msg:  "get transactions success",
+		})
+	}
+}
