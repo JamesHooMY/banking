@@ -72,6 +72,30 @@ services:
             - ./mysql/slave/slave.cnf:/etc/mysql/my.cnf
             - ./mysql/slave/slave-init.sh:/docker-entrypoint-initdb.d/init.sh
 
+    bytebase:
+        image: bytebase/bytebase:latest
+        container_name: bytebase
+        # environment:
+        #     - BB_DB_HOST=mysql-master
+        #     - BB_DB_PORT=3306
+        #     - BB_DB_USER=root
+        #     - BB_DB_PASSWORD=root_password
+        #     - BB_DB_NAME=banking
+        # volumes:
+        #     - bytebase_data:/root/bytebase
+        ports:
+            - '8081:8080'
+        depends_on:
+            - mysql-master
+            - mysql-slave
+        healthcheck:
+            test: ['CMD', 'curl', '-f', 'http://localhost:8081/api/health']
+            interval: 10s
+            timeout: 5s
+            retries: 3
+        networks:
+            - mynetwork
+
     prometheus:
         image: prom/prometheus
         container_name: prometheus
@@ -179,6 +203,26 @@ services:
             - ./k6/scripts:/scripts
             - ./k6/config.json:/config.json
             - ./k6/results:/results
+        networks:
+            - mynetwork
+
+    redis-cluster:
+        image: 'bitnami/redis-cluster:latest'
+        environment:
+            - REDIS_PASSWORD=redis_password
+            - REDIS_NODES=redis-cluster:7000 redis-cluster:7001 redis-cluster:7002 redis-cluster:7003 redis-cluster:7004 redis-cluster:7005
+        ports:
+            - '7000:7000'
+            - '7001:7001'
+            - '7002:7002'
+            - '7003:7003'
+            - '7004:7004'
+            - '7005:7005'
+        healthcheck:
+            test: ['CMD', 'redis-cli', '-a', 'redis_password', 'ping']
+            interval: 10s
+            timeout: 5s
+            retries: 3
         networks:
             - mynetwork
 
