@@ -1,6 +1,7 @@
 # Banking System
 - [Banking System](#banking-system)
 - [Project structure](#project-structure)
+- [Clean Architecture](#clean-architecture)
 - [Start the server](#start-the-server)
 - [Stop the server](#stop-the-server)
 - [Add New Restful api](#add-new-restful-api)
@@ -96,6 +97,53 @@ banking/
 ├─ main.go
 ├─ makefile
 ├─ README.md
+```
+
+# Clean Architecture
+* This application is designed with Clean Architecture, including 5 layers:
+    1. Handler: This layer is responsible for handling the request and response.
+    2. Service: This layer is responsible for the business logic.
+    3. Repository: This layer is responsible for the data access.
+    4. Model: This layer is responsible for the data structure used in data access.
+    5. Domain: This layer is responsible for the interface and the data structure used in handler, service, and repository.
+```mermaid
+%%{init: {'theme': 'dark'}}%%
+flowchart RL
+    subgraph Data_Sources
+        RDBMS[(RDBMS)]
+        NoSQL[(NoSQL)]
+        Microservices((Microservices))
+    end
+
+    subgraph Application Server
+        Domain["Domain"]
+        Model["Model"]
+        Repository["Repository"]
+        Service["Service"]
+        Handler["Handler"]
+    end
+
+    subgraph Clients
+        gRPC["gRPC"]
+        REST["REST"]
+        CLI["CLI"]
+        Web["Web"]
+    end
+
+    Domain -.-> Handler
+    Domain -.-> Service
+    Domain -.-> Repository
+    Model -.-> Repository
+
+    Data_Sources <---> |Data Access| Repository
+    Repository  <---> |Data Access| Service
+    Service <---> |Business Logic| Handler
+
+    Handler <---> |Message| gRPC
+    Handler <---> |Message| REST
+    Handler <---> |Message| CLI
+    Handler <---> |Message| Web
+
 ```
 
 # Start the server
