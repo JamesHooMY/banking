@@ -76,24 +76,8 @@ func (h *UserHandler) CreateUser() gin.HandlerFunc {
 				Name:    user.Name,
 				Balance: user.Balance,
 			},
-			Msg: "user created",
 		})
 	}
-}
-
-type CreateUserReq struct {
-	Name string `json:"name" binding:"required,min=3,max=20,alphanumunicode"`
-}
-
-type User struct {
-	ID      uint            `json:"id"`
-	Name    string          `json:"name"`
-	Balance decimal.Decimal `json:"balance"`
-}
-
-type CreateUserResp struct {
-	Data *User  `json:"data"`
-	Msg  string `json:"msg"`
 }
 
 // @Tags User
@@ -137,14 +121,8 @@ func (h *UserHandler) GetUser() gin.HandlerFunc {
 				Name:    user.Name,
 				Balance: user.Balance,
 			},
-			Msg: "user found",
 		})
 	}
-}
-
-type GetUserResp struct {
-	Data *User  `json:"data"`
-	Msg  string `json:"msg"`
 }
 
 func (h *UserHandler) GetUsers() gin.HandlerFunc {
@@ -159,9 +137,17 @@ func (h *UserHandler) GetUsers() gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, v1.ErrResponse{
-			Data: users,
-			Msg:  "users found",
+		data := make([]*User, 0, len(users))
+		for _, user := range users {
+			data = append(data, &User{
+				ID:      user.ID,
+				Name:    user.Name,
+				Balance: user.Balance,
+			})
+		}
+
+		c.JSON(http.StatusOK, GetUsersResp{
+			Data: data,
 		})
 	}
 }

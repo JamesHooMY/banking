@@ -19,9 +19,7 @@ import (
 	"go.elastic.co/apm/v2"
 )
 
-var mockUserService *domainMock.MockIUserService
-
-func initialUserHandler(t *testing.T) {
+func initialUserHandler(t *testing.T) (*gin.Context, *httptest.ResponseRecorder, *domainMock.MockIUserService) {
 	gin.SetMode(gin.TestMode)
 
 	// Initialize APM tracer
@@ -29,11 +27,20 @@ func initialUserHandler(t *testing.T) {
 	router.InitRouter(gin.Default(), nil, nil, nil, tracer)
 
 	ctrl := gomock.NewController(t)
-	mockUserService = domainMock.NewMockIUserService(ctrl)
+	mockUserService := domainMock.NewMockIUserService(ctrl)
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+
+	t.Cleanup(func() {
+		ctrl.Finish()
+	})
+
+	return c, w, mockUserService
 }
 
 func Test_CreateUser(t *testing.T) {
-	initialUserHandler(t)
+	c, w, mockUserService := initialUserHandler(t)
 
 	// variables
 	user := &mysqlModel.User{
@@ -41,7 +48,8 @@ func Test_CreateUser(t *testing.T) {
 		Balance: decimal.NewFromFloat(0),
 	}
 	reqBody := userHdl.CreateUserReq{Name: user.Name}
-	reqBodyBytes, _ := json.Marshal(reqBody)
+	reqBodyBytes, err := json.Marshal(reqBody)
+	assert.NoError(t, err)
 
 	// mock
 	mockUserService.EXPECT().
@@ -49,14 +57,17 @@ func Test_CreateUser(t *testing.T) {
 		Return(nil)
 
 	// request
-	w := httptest.NewRecorder()
-	c, _ := gin.CreateTestContext(w)
 	c.Request = httptest.NewRequest("POST", "/api/v1/user", bytes.NewReader(reqBodyBytes))
 
 	// handler
 	hdl := userHdl.NewUserHandler(mockUserService)
 	hdl.CreateUser()(c)
 
+	// Check status code
 	assert.Equal(t, http.StatusCreated, w.Code)
-	assert.Contains(t, w.Body.String(), "user created")
+
+	// Check response body
+	var actualResponse userHdl.CreateUserResp
+	err = json.Unmarshal(w.Body.Bytes(), &actualResponse)
+	assert.NoError(t, err)
 }

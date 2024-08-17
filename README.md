@@ -118,6 +118,8 @@ flowchart RL
     subgraph Application Server
         Domain["Domain"]
         Model["Model"]
+        DTO["DTO"]
+
         Repository["Repository"]
         Service["Service"]
         Handler["Handler"]
@@ -130,10 +132,12 @@ flowchart RL
         Web["Web"]
     end
 
-    Domain -.-> Handler
-    Domain -.-> Service
-    Domain -.-> Repository
-    Model -.-> Repository
+    Domain -.-o Handler
+    Domain -.-o Service
+    Domain -.-o Repository
+
+    DTO -.-o Handler
+    Model -.-o Repository
 
     Data_Sources <---> |Data Access| Repository
     Repository  <---> |Data Access| Service

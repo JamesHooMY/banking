@@ -71,9 +71,8 @@ func (h *TransactionHandler) Transfer() gin.HandlerFunc {
 
 		global.Logger.With(apmzap.TraceContext(ctx)).Info(fmt.Sprintf("[Transfer]: fromUserId: %d, toUserId: %d, amount: %f", input.FromUserID, input.ToUserID, input.Amount))
 
-		c.JSON(http.StatusOK, &v1.ErrResponse{
+		c.JSON(http.StatusOK, &TransferResp{
 			Data: user,
-			Msg:  "transfer success",
 		})
 	}
 }
@@ -107,9 +106,8 @@ func (h *TransactionHandler) Deposit() gin.HandlerFunc {
 
 		global.Logger.With(apmzap.TraceContext(ctx)).Info(fmt.Sprintf("[Deposit]: userId: %d, amount: %f", input.UserID, input.Amount))
 
-		c.JSON(http.StatusOK, &v1.ErrResponse{
+		c.JSON(http.StatusOK, &DepositResp{
 			Data: user,
-			Msg:  "deposit success",
 		})
 	}
 }
@@ -151,9 +149,8 @@ func (h *TransactionHandler) Withdraw() gin.HandlerFunc {
 
 		global.Logger.With(apmzap.TraceContext(ctx)).Info(fmt.Sprintf("[Withdraw]: userId: %d, amount: %f", input.UserID, input.Amount))
 
-		c.JSON(http.StatusOK, &v1.ErrResponse{
+		c.JSON(http.StatusOK, &WithdrawResp{
 			Data: user,
-			Msg:  "withdraw success",
 		})
 	}
 }
@@ -174,9 +171,8 @@ func (h *TransactionHandler) GetTransactions() gin.HandlerFunc {
 
 		global.Logger.With(apmzap.TraceContext(ctx)).Info(fmt.Sprintf("[GetTransactions]: transactions: %v", transactions))
 
-		c.JSON(http.StatusOK, &v1.ErrResponse{
+		c.JSON(http.StatusOK, &GetTransactionsResp{
 			Data: transactions,
-			Msg:  "get transactions success",
 		})
 	}
 }
