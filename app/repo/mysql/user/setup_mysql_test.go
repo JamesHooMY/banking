@@ -46,7 +46,7 @@ func InitialDockerMySQL() (
 	options := &dockertest.RunOptions{
 		Name:       "mysql_user_test",
 		Repository: "mysql",
-		Tag:        "5.7",
+		Tag:        "8.0",
 		Env: []string{
 			"MYSQL_ROOT_PASSWORD=root_password",
 			"MYSQL_DATABASE=banking",

@@ -5,8 +5,8 @@ import (
 	"errors"
 	"time"
 
-	mysqlModel "banking/model/mysql"
 	"banking/domain"
+	mysqlModel "banking/model/mysql"
 
 	"go.elastic.co/apm/v2"
 )

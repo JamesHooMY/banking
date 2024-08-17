@@ -105,6 +105,7 @@ func (r *transactionCommandRepo) Deposit(ctx context.Context, userID uint, amoun
 		return nil, err
 	}
 
+	beforeBalance := user.Balance
 	user.Balance = user.Balance.Add(amount)
 
 	result = tx.Save(user)
@@ -117,7 +118,7 @@ func (r *transactionCommandRepo) Deposit(ctx context.Context, userID uint, amoun
 		FromUserID:      userID,
 		ToUserID:        userID,
 		Amount:          amount,
-		FromUserBalance: user.Balance,
+		FromUserBalance: beforeBalance,
 		ToUserBalance:   user.Balance,
 		TransactionType: mysqlModel.Deposit,
 	}

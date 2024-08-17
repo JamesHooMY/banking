@@ -9,9 +9,89 @@ import (
 	context "context"
 	reflect "reflect"
 
+	gin "github.com/gin-gonic/gin"
 	gomock "github.com/golang/mock/gomock"
 	decimal "github.com/shopspring/decimal"
 )
+
+// MockITransactionHandler is a mock of ITransactionHandler interface.
+type MockITransactionHandler struct {
+	ctrl     *gomock.Controller
+	recorder *MockITransactionHandlerMockRecorder
+}
+
+// MockITransactionHandlerMockRecorder is the mock recorder for MockITransactionHandler.
+type MockITransactionHandlerMockRecorder struct {
+	mock *MockITransactionHandler
+}
+
+// NewMockITransactionHandler creates a new mock instance.
+func NewMockITransactionHandler(ctrl *gomock.Controller) *MockITransactionHandler {
+	mock := &MockITransactionHandler{ctrl: ctrl}
+	mock.recorder = &MockITransactionHandlerMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockITransactionHandler) EXPECT() *MockITransactionHandlerMockRecorder {
+	return m.recorder
+}
+
+// Deposit mocks base method.
+func (m *MockITransactionHandler) Deposit() gin.HandlerFunc {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Deposit")
+	ret0, _ := ret[0].(gin.HandlerFunc)
+	return ret0
+}
+
+// Deposit indicates an expected call of Deposit.
+func (mr *MockITransactionHandlerMockRecorder) Deposit() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Deposit", reflect.TypeOf((*MockITransactionHandler)(nil).Deposit))
+}
+
+// GetTransactions mocks base method.
+func (m *MockITransactionHandler) GetTransactions() gin.HandlerFunc {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTransactions")
+	ret0, _ := ret[0].(gin.HandlerFunc)
+	return ret0
+}
+
+// GetTransactions indicates an expected call of GetTransactions.
+func (mr *MockITransactionHandlerMockRecorder) GetTransactions() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTransactions", reflect.TypeOf((*MockITransactionHandler)(nil).GetTransactions))
+}
+
+// Transfer mocks base method.
+func (m *MockITransactionHandler) Transfer() gin.HandlerFunc {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Transfer")
+	ret0, _ := ret[0].(gin.HandlerFunc)
+	return ret0
+}
+
+// Transfer indicates an expected call of Transfer.
+func (mr *MockITransactionHandlerMockRecorder) Transfer() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Transfer", reflect.TypeOf((*MockITransactionHandler)(nil).Transfer))
+}
+
+// Withdraw mocks base method.
+func (m *MockITransactionHandler) Withdraw() gin.HandlerFunc {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Withdraw")
+	ret0, _ := ret[0].(gin.HandlerFunc)
+	return ret0
+}
+
+// Withdraw indicates an expected call of Withdraw.
+func (mr *MockITransactionHandlerMockRecorder) Withdraw() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Withdraw", reflect.TypeOf((*MockITransactionHandler)(nil).Withdraw))
+}
 
 // MockITransactionService is a mock of ITransactionService interface.
 type MockITransactionService struct {
@@ -51,6 +131,21 @@ func (mr *MockITransactionServiceMockRecorder) Deposit(ctx, userID, amount inter
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Deposit", reflect.TypeOf((*MockITransactionService)(nil).Deposit), ctx, userID, amount)
 }
 
+// GetTransactions mocks base method.
+func (m *MockITransactionService) GetTransactions(ctx context.Context) ([]*mysql.Transaction, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTransactions", ctx)
+	ret0, _ := ret[0].([]*mysql.Transaction)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTransactions indicates an expected call of GetTransactions.
+func (mr *MockITransactionServiceMockRecorder) GetTransactions(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTransactions", reflect.TypeOf((*MockITransactionService)(nil).GetTransactions), ctx)
+}
+
 // Transfer mocks base method.
 func (m *MockITransactionService) Transfer(ctx context.Context, fromUserID, toUserID uint, amount decimal.Decimal) (*mysql.User, error) {
 	m.ctrl.T.Helper()
@@ -79,6 +174,44 @@ func (m *MockITransactionService) Withdraw(ctx context.Context, userID uint, amo
 func (mr *MockITransactionServiceMockRecorder) Withdraw(ctx, userID, amount interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Withdraw", reflect.TypeOf((*MockITransactionService)(nil).Withdraw), ctx, userID, amount)
+}
+
+// MockITransactionQueryRepo is a mock of ITransactionQueryRepo interface.
+type MockITransactionQueryRepo struct {
+	ctrl     *gomock.Controller
+	recorder *MockITransactionQueryRepoMockRecorder
+}
+
+// MockITransactionQueryRepoMockRecorder is the mock recorder for MockITransactionQueryRepo.
+type MockITransactionQueryRepoMockRecorder struct {
+	mock *MockITransactionQueryRepo
+}
+
+// NewMockITransactionQueryRepo creates a new mock instance.
+func NewMockITransactionQueryRepo(ctrl *gomock.Controller) *MockITransactionQueryRepo {
+	mock := &MockITransactionQueryRepo{ctrl: ctrl}
+	mock.recorder = &MockITransactionQueryRepoMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockITransactionQueryRepo) EXPECT() *MockITransactionQueryRepoMockRecorder {
+	return m.recorder
+}
+
+// GetTransactions mocks base method.
+func (m *MockITransactionQueryRepo) GetTransactions(ctx context.Context) ([]*mysql.Transaction, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTransactions", ctx)
+	ret0, _ := ret[0].([]*mysql.Transaction)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTransactions indicates an expected call of GetTransactions.
+func (mr *MockITransactionQueryRepoMockRecorder) GetTransactions(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTransactions", reflect.TypeOf((*MockITransactionQueryRepo)(nil).GetTransactions), ctx)
 }
 
 // MockITransactionCommandRepo is a mock of ITransactionCommandRepo interface.

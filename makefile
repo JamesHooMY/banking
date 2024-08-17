@@ -7,6 +7,9 @@ build:
 lint:
 	golangci-lint run --timeout 10m ./... --fix
 
+update:
+	go get -u ./...
+
 tidy:
 	go mod tidy && go mod vendor
 

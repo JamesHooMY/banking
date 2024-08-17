@@ -9,8 +9,74 @@ import (
 	context "context"
 	reflect "reflect"
 
+	gin "github.com/gin-gonic/gin"
 	gomock "github.com/golang/mock/gomock"
 )
+
+// MockIUserHandler is a mock of IUserHandler interface.
+type MockIUserHandler struct {
+	ctrl     *gomock.Controller
+	recorder *MockIUserHandlerMockRecorder
+}
+
+// MockIUserHandlerMockRecorder is the mock recorder for MockIUserHandler.
+type MockIUserHandlerMockRecorder struct {
+	mock *MockIUserHandler
+}
+
+// NewMockIUserHandler creates a new mock instance.
+func NewMockIUserHandler(ctrl *gomock.Controller) *MockIUserHandler {
+	mock := &MockIUserHandler{ctrl: ctrl}
+	mock.recorder = &MockIUserHandlerMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockIUserHandler) EXPECT() *MockIUserHandlerMockRecorder {
+	return m.recorder
+}
+
+// CreateUser mocks base method.
+func (m *MockIUserHandler) CreateUser() gin.HandlerFunc {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateUser")
+	ret0, _ := ret[0].(gin.HandlerFunc)
+	return ret0
+}
+
+// CreateUser indicates an expected call of CreateUser.
+func (mr *MockIUserHandlerMockRecorder) CreateUser() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUser", reflect.TypeOf((*MockIUserHandler)(nil).CreateUser))
+}
+
+// GetUser mocks base method.
+func (m *MockIUserHandler) GetUser() gin.HandlerFunc {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUser")
+	ret0, _ := ret[0].(gin.HandlerFunc)
+	return ret0
+}
+
+// GetUser indicates an expected call of GetUser.
+func (mr *MockIUserHandlerMockRecorder) GetUser() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUser", reflect.TypeOf((*MockIUserHandler)(nil).GetUser))
+}
+
+// GetUsers mocks base method.
+func (m *MockIUserHandler) GetUsers() gin.HandlerFunc {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUsers")
+	ret0, _ := ret[0].(gin.HandlerFunc)
+	return ret0
+}
+
+// GetUsers indicates an expected call of GetUsers.
+func (mr *MockIUserHandlerMockRecorder) GetUsers() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUsers", reflect.TypeOf((*MockIUserHandler)(nil).GetUsers))
+}
 
 // MockIUserService is a mock of IUserService interface.
 type MockIUserService struct {
