@@ -6,6 +6,8 @@ import (
 	mysqlModel "banking/model/mysql"
 )
 
+//go:generate mockgen -destination ./mock/apikey.go -source=./apikey.go -package=mock
+
 type IAPIKeyService interface {
 	CreateAPIKey(ctx context.Context, userID uint) (key string, secret string, err error)
 	DeleteAPIKey(ctx context.Context, userID uint, key string) (err error)

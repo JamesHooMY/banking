@@ -36,6 +36,20 @@ func (m *MockIUserHandler) EXPECT() *MockIUserHandlerMockRecorder {
 	return m.recorder
 }
 
+// CreateAPIKey mocks base method.
+func (m *MockIUserHandler) CreateAPIKey() gin.HandlerFunc {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateAPIKey")
+	ret0, _ := ret[0].(gin.HandlerFunc)
+	return ret0
+}
+
+// CreateAPIKey indicates an expected call of CreateAPIKey.
+func (mr *MockIUserHandlerMockRecorder) CreateAPIKey() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateAPIKey", reflect.TypeOf((*MockIUserHandler)(nil).CreateAPIKey))
+}
+
 // CreateUser mocks base method.
 func (m *MockIUserHandler) CreateUser() gin.HandlerFunc {
 	m.ctrl.T.Helper()
@@ -50,18 +64,32 @@ func (mr *MockIUserHandlerMockRecorder) CreateUser() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUser", reflect.TypeOf((*MockIUserHandler)(nil).CreateUser))
 }
 
-// GetUser mocks base method.
-func (m *MockIUserHandler) GetUser() gin.HandlerFunc {
+// DeleteAPIKey mocks base method.
+func (m *MockIUserHandler) DeleteAPIKey() gin.HandlerFunc {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUser")
+	ret := m.ctrl.Call(m, "DeleteAPIKey")
 	ret0, _ := ret[0].(gin.HandlerFunc)
 	return ret0
 }
 
-// GetUser indicates an expected call of GetUser.
-func (mr *MockIUserHandlerMockRecorder) GetUser() *gomock.Call {
+// DeleteAPIKey indicates an expected call of DeleteAPIKey.
+func (mr *MockIUserHandlerMockRecorder) DeleteAPIKey() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUser", reflect.TypeOf((*MockIUserHandler)(nil).GetUser))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteAPIKey", reflect.TypeOf((*MockIUserHandler)(nil).DeleteAPIKey))
+}
+
+// GetAPIKeys mocks base method.
+func (m *MockIUserHandler) GetAPIKeys() gin.HandlerFunc {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAPIKeys")
+	ret0, _ := ret[0].(gin.HandlerFunc)
+	return ret0
+}
+
+// GetAPIKeys indicates an expected call of GetAPIKeys.
+func (mr *MockIUserHandlerMockRecorder) GetAPIKeys() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAPIKeys", reflect.TypeOf((*MockIUserHandler)(nil).GetAPIKeys))
 }
 
 // GetUsers mocks base method.
@@ -76,6 +104,20 @@ func (m *MockIUserHandler) GetUsers() gin.HandlerFunc {
 func (mr *MockIUserHandlerMockRecorder) GetUsers() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUsers", reflect.TypeOf((*MockIUserHandler)(nil).GetUsers))
+}
+
+// Login mocks base method.
+func (m *MockIUserHandler) Login() gin.HandlerFunc {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Login")
+	ret0, _ := ret[0].(gin.HandlerFunc)
+	return ret0
+}
+
+// Login indicates an expected call of Login.
+func (mr *MockIUserHandlerMockRecorder) Login() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Login", reflect.TypeOf((*MockIUserHandler)(nil).Login))
 }
 
 // MockIUserService is a mock of IUserService interface.
@@ -115,34 +157,34 @@ func (mr *MockIUserServiceMockRecorder) CreateUser(ctx, user interface{}) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUser", reflect.TypeOf((*MockIUserService)(nil).CreateUser), ctx, user)
 }
 
-// GetUser mocks base method.
-func (m *MockIUserService) GetUser(ctx context.Context, userID uint) (*mysql.User, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUser", ctx, userID)
-	ret0, _ := ret[0].(*mysql.User)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetUser indicates an expected call of GetUser.
-func (mr *MockIUserServiceMockRecorder) GetUser(ctx, userID interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUser", reflect.TypeOf((*MockIUserService)(nil).GetUser), ctx, userID)
-}
-
 // GetUsers mocks base method.
-func (m *MockIUserService) GetUsers(ctx context.Context) ([]*mysql.User, error) {
+func (m *MockIUserService) GetUsers(ctx context.Context, userID uint) ([]*mysql.User, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUsers", ctx)
+	ret := m.ctrl.Call(m, "GetUsers", ctx, userID)
 	ret0, _ := ret[0].([]*mysql.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetUsers indicates an expected call of GetUsers.
-func (mr *MockIUserServiceMockRecorder) GetUsers(ctx interface{}) *gomock.Call {
+func (mr *MockIUserServiceMockRecorder) GetUsers(ctx, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUsers", reflect.TypeOf((*MockIUserService)(nil).GetUsers), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUsers", reflect.TypeOf((*MockIUserService)(nil).GetUsers), ctx, userID)
+}
+
+// Login mocks base method.
+func (m *MockIUserService) Login(ctx context.Context, email, password string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Login", ctx, email, password)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Login indicates an expected call of Login.
+func (mr *MockIUserServiceMockRecorder) Login(ctx, email, password interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Login", reflect.TypeOf((*MockIUserService)(nil).Login), ctx, email, password)
 }
 
 // MockIUserQueryRepo is a mock of IUserQueryRepo interface.
@@ -168,34 +210,34 @@ func (m *MockIUserQueryRepo) EXPECT() *MockIUserQueryRepoMockRecorder {
 	return m.recorder
 }
 
-// GetUser mocks base method.
-func (m *MockIUserQueryRepo) GetUser(ctx context.Context, userID uint) (*mysql.User, error) {
+// GetUserByEmail mocks base method.
+func (m *MockIUserQueryRepo) GetUserByEmail(ctx context.Context, email string) (*mysql.User, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUser", ctx, userID)
+	ret := m.ctrl.Call(m, "GetUserByEmail", ctx, email)
 	ret0, _ := ret[0].(*mysql.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetUser indicates an expected call of GetUser.
-func (mr *MockIUserQueryRepoMockRecorder) GetUser(ctx, userID interface{}) *gomock.Call {
+// GetUserByEmail indicates an expected call of GetUserByEmail.
+func (mr *MockIUserQueryRepoMockRecorder) GetUserByEmail(ctx, email interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUser", reflect.TypeOf((*MockIUserQueryRepo)(nil).GetUser), ctx, userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByEmail", reflect.TypeOf((*MockIUserQueryRepo)(nil).GetUserByEmail), ctx, email)
 }
 
 // GetUsers mocks base method.
-func (m *MockIUserQueryRepo) GetUsers(ctx context.Context) ([]*mysql.User, error) {
+func (m *MockIUserQueryRepo) GetUsers(ctx context.Context, userID uint) ([]*mysql.User, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUsers", ctx)
+	ret := m.ctrl.Call(m, "GetUsers", ctx, userID)
 	ret0, _ := ret[0].([]*mysql.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetUsers indicates an expected call of GetUsers.
-func (mr *MockIUserQueryRepoMockRecorder) GetUsers(ctx interface{}) *gomock.Call {
+func (mr *MockIUserQueryRepoMockRecorder) GetUsers(ctx, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUsers", reflect.TypeOf((*MockIUserQueryRepo)(nil).GetUsers), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUsers", reflect.TypeOf((*MockIUserQueryRepo)(nil).GetUsers), ctx, userID)
 }
 
 // MockIUserCommandRepo is a mock of IUserCommandRepo interface.

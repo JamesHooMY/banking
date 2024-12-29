@@ -42,7 +42,7 @@ func Test_GetTransactions(t *testing.T) {
 	mysqlTestDB.Create(expectedTransaction)
 
 	transactionQueryRepo := transactionRepo.NewTransactionQueryRepo(mysqlTestDB)
-	transactions, err := transactionQueryRepo.GetTransactions(context.Background())
+	transactions, err := transactionQueryRepo.GetTransactions(context.Background(), user.ID)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -117,10 +117,10 @@ func (m *MockITransactionService) EXPECT() *MockITransactionServiceMockRecorder 
 }
 
 // Deposit mocks base method.
-func (m *MockITransactionService) Deposit(ctx context.Context, userID uint, amount decimal.Decimal) (*mysql.User, error) {
+func (m *MockITransactionService) Deposit(ctx context.Context, userID uint, amount decimal.Decimal) (*mysql.Transaction, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Deposit", ctx, userID, amount)
-	ret0, _ := ret[0].(*mysql.User)
+	ret0, _ := ret[0].(*mysql.Transaction)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -132,25 +132,25 @@ func (mr *MockITransactionServiceMockRecorder) Deposit(ctx, userID, amount inter
 }
 
 // GetTransactions mocks base method.
-func (m *MockITransactionService) GetTransactions(ctx context.Context) ([]*mysql.Transaction, error) {
+func (m *MockITransactionService) GetTransactions(ctx context.Context, userID uint) ([]*mysql.Transaction, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTransactions", ctx)
+	ret := m.ctrl.Call(m, "GetTransactions", ctx, userID)
 	ret0, _ := ret[0].([]*mysql.Transaction)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetTransactions indicates an expected call of GetTransactions.
-func (mr *MockITransactionServiceMockRecorder) GetTransactions(ctx interface{}) *gomock.Call {
+func (mr *MockITransactionServiceMockRecorder) GetTransactions(ctx, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTransactions", reflect.TypeOf((*MockITransactionService)(nil).GetTransactions), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTransactions", reflect.TypeOf((*MockITransactionService)(nil).GetTransactions), ctx, userID)
 }
 
 // Transfer mocks base method.
-func (m *MockITransactionService) Transfer(ctx context.Context, fromUserID, toUserID uint, amount decimal.Decimal) (*mysql.User, error) {
+func (m *MockITransactionService) Transfer(ctx context.Context, fromUserID, toUserID uint, amount decimal.Decimal) (*mysql.Transaction, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Transfer", ctx, fromUserID, toUserID, amount)
-	ret0, _ := ret[0].(*mysql.User)
+	ret0, _ := ret[0].(*mysql.Transaction)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -162,10 +162,10 @@ func (mr *MockITransactionServiceMockRecorder) Transfer(ctx, fromUserID, toUserI
 }
 
 // Withdraw mocks base method.
-func (m *MockITransactionService) Withdraw(ctx context.Context, userID uint, amount decimal.Decimal) (*mysql.User, error) {
+func (m *MockITransactionService) Withdraw(ctx context.Context, userID uint, amount decimal.Decimal) (*mysql.Transaction, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Withdraw", ctx, userID, amount)
-	ret0, _ := ret[0].(*mysql.User)
+	ret0, _ := ret[0].(*mysql.Transaction)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -200,18 +200,18 @@ func (m *MockITransactionQueryRepo) EXPECT() *MockITransactionQueryRepoMockRecor
 }
 
 // GetTransactions mocks base method.
-func (m *MockITransactionQueryRepo) GetTransactions(ctx context.Context) ([]*mysql.Transaction, error) {
+func (m *MockITransactionQueryRepo) GetTransactions(ctx context.Context, userID uint) ([]*mysql.Transaction, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTransactions", ctx)
+	ret := m.ctrl.Call(m, "GetTransactions", ctx, userID)
 	ret0, _ := ret[0].([]*mysql.Transaction)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetTransactions indicates an expected call of GetTransactions.
-func (mr *MockITransactionQueryRepoMockRecorder) GetTransactions(ctx interface{}) *gomock.Call {
+func (mr *MockITransactionQueryRepoMockRecorder) GetTransactions(ctx, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTransactions", reflect.TypeOf((*MockITransactionQueryRepo)(nil).GetTransactions), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTransactions", reflect.TypeOf((*MockITransactionQueryRepo)(nil).GetTransactions), ctx, userID)
 }
 
 // MockITransactionCommandRepo is a mock of ITransactionCommandRepo interface.
@@ -238,10 +238,10 @@ func (m *MockITransactionCommandRepo) EXPECT() *MockITransactionCommandRepoMockR
 }
 
 // Deposit mocks base method.
-func (m *MockITransactionCommandRepo) Deposit(ctx context.Context, userID uint, amount decimal.Decimal) (*mysql.User, error) {
+func (m *MockITransactionCommandRepo) Deposit(ctx context.Context, userID uint, amount decimal.Decimal) (*mysql.Transaction, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Deposit", ctx, userID, amount)
-	ret0, _ := ret[0].(*mysql.User)
+	ret0, _ := ret[0].(*mysql.Transaction)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -253,10 +253,10 @@ func (mr *MockITransactionCommandRepoMockRecorder) Deposit(ctx, userID, amount i
 }
 
 // Transfer mocks base method.
-func (m *MockITransactionCommandRepo) Transfer(ctx context.Context, fromUserID, toUserID uint, amount decimal.Decimal) (*mysql.User, error) {
+func (m *MockITransactionCommandRepo) Transfer(ctx context.Context, fromUserID, toUserID uint, amount decimal.Decimal) (*mysql.Transaction, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Transfer", ctx, fromUserID, toUserID, amount)
-	ret0, _ := ret[0].(*mysql.User)
+	ret0, _ := ret[0].(*mysql.Transaction)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -268,10 +268,10 @@ func (mr *MockITransactionCommandRepoMockRecorder) Transfer(ctx, fromUserID, toU
 }
 
 // Withdraw mocks base method.
-func (m *MockITransactionCommandRepo) Withdraw(ctx context.Context, userID uint, amount decimal.Decimal) (*mysql.User, error) {
+func (m *MockITransactionCommandRepo) Withdraw(ctx context.Context, userID uint, amount decimal.Decimal) (*mysql.Transaction, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Withdraw", ctx, userID, amount)
-	ret0, _ := ret[0].(*mysql.User)
+	ret0, _ := ret[0].(*mysql.Transaction)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

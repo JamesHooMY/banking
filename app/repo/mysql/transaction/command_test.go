@@ -25,33 +25,35 @@ func Test_Transfer(t *testing.T) {
 	); err != nil {
 		t.Fatal(err)
 	}
-	mysqlTestDB.CreateInBatches([]*mysqlModel.User{
-		{
-			Model:   gorm.Model{ID: 1},
-			Name:    "user1",
-			Balance: decimal.NewFromFloat(100),
-		},
-		{
-			Model:   gorm.Model{ID: 2},
-			Name:    "user2",
-			Balance: decimal.NewFromFloat(200),
-		},
-	}, 2)
+
+	user1 := &mysqlModel.User{
+		Model:   gorm.Model{ID: 1},
+		Name:    "user1",
+		Balance: decimal.NewFromFloat(100),
+	}
+
+	user2 := &mysqlModel.User{
+		Model:   gorm.Model{ID: 2},
+		Name:    "user2",
+		Balance: decimal.NewFromFloat(200),
+	}
+
+	result := mysqlTestDB.CreateInBatches([]*mysqlModel.User{user1, user2}, 2)
+	if result.Error != nil {
+		t.Fatal(result.Error)
+	}
 
 	transactionCommandRepo := transactionRepo.NewTransactionCommandRepo(mysqlTestDB)
-	user, err := transactionCommandRepo.Transfer(context.Background(), 1, 2, decimal.NewFromFloat(50))
+	transaction, err := transactionCommandRepo.Transfer(context.Background(), user1.Model.ID, user2.Model.ID, decimal.NewFromFloat(50))
 
 	assert.Nil(t, err)
-	assert.NotNil(t, user)
-	assert.Equal(t, "user1", user.Name)
-	assert.True(t, user.Balance.Equal(decimal.NewFromFloat(50)))
-
-	user2 := &mysqlModel.User{}
-	mysqlTestDB.First(user2, "name = ?", "user2")
-
-	assert.NotNil(t, user2)
-	assert.Equal(t, "user2", user2.Name)
-	assert.True(t, user2.Balance.Equal(decimal.NewFromFloat(250)))
+	assert.NotNil(t, transaction)
+	assert.Equal(t, transaction.FromUserID, user1.Model.ID)
+	assert.Equal(t, transaction.ToUserID, user2.Model.ID)
+	assert.Equal(t, transaction.Amount, decimal.NewFromFloat(50))
+	assert.Equal(t, transaction.FromUserBalance, user1.Balance.Sub(decimal.NewFromFloat(50)))
+	assert.Equal(t, transaction.ToUserBalance, user2.Balance.Add(decimal.NewFromFloat(50)))
+	assert.Equal(t, transaction.TransactionType, mysqlModel.Transfer)
 }
 
 func Test_Deposit(t *testing.T) {
@@ -67,19 +69,29 @@ func Test_Deposit(t *testing.T) {
 	); err != nil {
 		t.Fatal(err)
 	}
-	mysqlTestDB.Create(&mysqlModel.User{
+
+	user1 := &mysqlModel.User{
 		Model:   gorm.Model{ID: 1},
 		Name:    "user1",
 		Balance: decimal.NewFromFloat(100),
-	})
+	}
+
+	result := mysqlTestDB.Create(user1)
+	if result.Error != nil {
+		t.Fatal(result.Error)
+	}
 
 	transactionCommandRepo := transactionRepo.NewTransactionCommandRepo(mysqlTestDB)
-	user, err := transactionCommandRepo.Deposit(context.Background(), 1, decimal.NewFromFloat(50))
+	transaction, err := transactionCommandRepo.Deposit(context.Background(), 1, decimal.NewFromFloat(50))
 
 	assert.Nil(t, err)
-	assert.NotNil(t, user)
-	assert.Equal(t, "user1", user.Name)
-	assert.True(t, user.Balance.Equal(decimal.NewFromFloat(150)))
+	assert.NotNil(t, transaction)
+	assert.Equal(t, user1.Model.ID, transaction.FromUserID)
+	assert.Equal(t, user1.Model.ID, transaction.ToUserID)
+	assert.Equal(t, user1.Balance.Add(decimal.NewFromFloat(50)), transaction.FromUserBalance)
+	assert.Equal(t, user1.Balance.Add(decimal.NewFromFloat(50)), transaction.ToUserBalance)
+	assert.Equal(t, decimal.NewFromFloat(50), transaction.Amount)
+	assert.Equal(t, mysqlModel.Deposit, transaction.TransactionType)
 }
 
 func Test_Withdraw(t *testing.T) {
@@ -95,17 +107,24 @@ func Test_Withdraw(t *testing.T) {
 	); err != nil {
 		t.Fatal(err)
 	}
-	mysqlTestDB.Create(&mysqlModel.User{
+
+	user1 := &mysqlModel.User{
 		Model:   gorm.Model{ID: 1},
 		Name:    "user1",
 		Balance: decimal.NewFromFloat(100),
-	})
+	}
+
+	mysqlTestDB.Create(user1)
 
 	transactionCommandRepo := transactionRepo.NewTransactionCommandRepo(mysqlTestDB)
-	user, err := transactionCommandRepo.Withdraw(context.Background(), 1, decimal.NewFromFloat(50))
+	transaction, err := transactionCommandRepo.Withdraw(context.Background(), 1, decimal.NewFromFloat(50))
 
 	assert.Nil(t, err)
-	assert.NotNil(t, user)
-	assert.Equal(t, "user1", user.Name)
-	assert.True(t, user.Balance.Equal(decimal.NewFromFloat(50)))
+	assert.NotNil(t, transaction)
+	assert.Equal(t, user1.Model.ID, transaction.FromUserID)
+	assert.Equal(t, user1.Model.ID, transaction.ToUserID)
+	assert.Equal(t, user1.Balance.Sub(decimal.NewFromFloat(50)), transaction.FromUserBalance)
+	assert.Equal(t, user1.Balance.Sub(decimal.NewFromFloat(50)), transaction.ToUserBalance)
+	assert.Equal(t, decimal.NewFromFloat(50), transaction.Amount)
+	assert.Equal(t, mysqlModel.Withdraw, transaction.TransactionType)
 }

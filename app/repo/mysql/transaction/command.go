@@ -105,7 +105,7 @@ func (r *transactionCommandRepo) Deposit(ctx context.Context, userID uint, amoun
 		return nil, err
 	}
 
-	beforeBalance := user.Balance
+	// beforeBalance := user.Balance
 	user.Balance = user.Balance.Add(amount)
 
 	result = tx.Save(user)
@@ -115,10 +115,11 @@ func (r *transactionCommandRepo) Deposit(ctx context.Context, userID uint, amoun
 	}
 
 	transaction = &mysqlModel.Transaction{
-		FromUserID:      userID,
-		ToUserID:        userID,
-		Amount:          amount,
-		FromUserBalance: beforeBalance,
+		FromUserID: userID,
+		ToUserID:   userID,
+		Amount:     amount,
+		// FromUserBalance: beforeBalance,
+		FromUserBalance: user.Balance,
 		ToUserBalance:   user.Balance,
 		TransactionType: mysqlModel.Deposit,
 	}
@@ -158,7 +159,7 @@ func (r *transactionCommandRepo) Withdraw(ctx context.Context, userID uint, amou
 		return nil, ErrInsufficientBalance
 	}
 
-	beforeBalance := user.Balance
+	// beforeBalance := user.Balance
 	user.Balance = user.Balance.Sub(amount)
 
 	result = tx.Save(user)
@@ -168,10 +169,11 @@ func (r *transactionCommandRepo) Withdraw(ctx context.Context, userID uint, amou
 	}
 
 	transaction = &mysqlModel.Transaction{
-		FromUserID:      userID,
-		ToUserID:        userID,
-		Amount:          amount,
-		FromUserBalance: beforeBalance,
+		FromUserID: userID,
+		ToUserID:   userID,
+		Amount:     amount,
+		// FromUserBalance: beforeBalance,
+		FromUserBalance: user.Balance,
 		ToUserBalance:   user.Balance,
 		TransactionType: mysqlModel.Withdraw,
 	}

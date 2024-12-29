@@ -133,25 +133,25 @@ func seedUsers(db *gorm.DB) {
 
 	users := []*mysqlModel.User{
 		{
-			Name:    "User1",
-			Email:   "User1@yopmail.com",
-			Balance: decimal.NewFromFloat(100.00),
+			Name:     "user1",
+			Email:    "user1@yopmail.com",
+			Balance:  decimal.NewFromFloat(100.00),
 			Password: string(hashedPassword),
-			IsAdmin: true,
+			IsAdmin:  true,
 		},
 		{
-			Name:    "User2",
-			Email:   "User2@yopmail.com",
-			Balance: decimal.NewFromFloat(200.00),
+			Name:     "user2",
+			Email:    "user2@yopmail.com",
+			Balance:  decimal.NewFromFloat(200.00),
 			Password: string(hashedPassword),
-			IsAdmin: false,
+			IsAdmin:  false,
 		},
 		{
-			Name:    "User3",
-			Email:   "User3@yopmail.com",
-			Balance: decimal.NewFromFloat(300.00),
+			Name:     "user3",
+			Email:    "user3@yopmail.com",
+			Balance:  decimal.NewFromFloat(300.00),
 			Password: string(hashedPassword),
-			IsAdmin: false,
+			IsAdmin:  false,
 		},
 	}
 

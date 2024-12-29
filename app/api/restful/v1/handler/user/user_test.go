@@ -19,7 +19,7 @@ import (
 	"go.elastic.co/apm/v2"
 )
 
-func initialUserHandler(t *testing.T) (*gin.Context, *httptest.ResponseRecorder, *domainMock.MockIUserService) {
+func initialUserHandler(t *testing.T) (*gin.Context, *httptest.ResponseRecorder, *domainMock.MockIUserService, *domainMock.MockIAPIKeyService) {
 	gin.SetMode(gin.TestMode)
 
 	// Initialize APM tracer
@@ -28,6 +28,7 @@ func initialUserHandler(t *testing.T) (*gin.Context, *httptest.ResponseRecorder,
 
 	ctrl := gomock.NewController(t)
 	mockUserService := domainMock.NewMockIUserService(ctrl)
+	mockAPIKeyService := domainMock.NewMockIAPIKeyService(ctrl)
 
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
@@ -36,18 +37,24 @@ func initialUserHandler(t *testing.T) (*gin.Context, *httptest.ResponseRecorder,
 		ctrl.Finish()
 	})
 
-	return c, w, mockUserService
+	return c, w, mockUserService, mockAPIKeyService
 }
 
 func Test_CreateUser(t *testing.T) {
-	c, w, mockUserService := initialUserHandler(t)
+	c, w, mockUserService, mockAPIKeyService := initialUserHandler(t)
 
 	// variables
 	user := &mysqlModel.User{
-		Name:    "user1",
-		Balance: decimal.NewFromFloat(0),
+		Name:     "user1",
+		Email:    "user1@yopmail.com",
+		Password: "password",
+		Balance:  decimal.NewFromFloat(0),
 	}
-	reqBody := userHdl.CreateUserReq{Name: user.Name}
+	reqBody := userHdl.CreateUserReq{
+		Name:     user.Name,
+		Email:    user.Email,
+		Password: user.Password,
+	}
 	reqBodyBytes, err := json.Marshal(reqBody)
 	assert.NoError(t, err)
 
@@ -60,14 +67,16 @@ func Test_CreateUser(t *testing.T) {
 	c.Request = httptest.NewRequest("POST", "/api/v1/user", bytes.NewReader(reqBodyBytes))
 
 	// handler
-	hdl := userHdl.NewUserHandler(mockUserService)
+	hdl := userHdl.NewUserHandler(mockUserService, mockAPIKeyService)
 	hdl.CreateUser()(c)
 
 	// Check status code
-	assert.Equal(t, http.StatusCreated, w.Code)
+	assert.Equal(t, http.StatusCreated, w.Code, w.Body.String())
 
 	// Check response body
 	var actualResponse userHdl.CreateUserResp
 	err = json.Unmarshal(w.Body.Bytes(), &actualResponse)
 	assert.NoError(t, err)
+	assert.Equal(t, user.Name, actualResponse.Data.Name)
+	assert.Equal(t, user.Balance, actualResponse.Data.Balance)
 }
