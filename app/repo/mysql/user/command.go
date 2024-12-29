@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	domain "banking/domain"
+	"banking/domain"
 	mysqlModel "banking/model/mysql"
 
 	"go.elastic.co/apm/v2"

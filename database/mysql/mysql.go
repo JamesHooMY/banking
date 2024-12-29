@@ -10,6 +10,7 @@ import (
 	"github.com/shopspring/decimal"
 	"github.com/spf13/viper"
 	mysql "go.elastic.co/apm/module/apmgormv2/v2/driver/mysql"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
@@ -44,6 +45,7 @@ func NewMasterDB(ctx context.Context) (*Master, error) {
 	if err := db.AutoMigrate(
 		&mysqlModel.User{},
 		&mysqlModel.Transaction{},
+		&mysqlModel.APIKey{},
 	); err != nil {
 		return nil, err
 	}
@@ -124,18 +126,32 @@ func retry(ctx context.Context, action func() error, attempts int, sleep time.Du
 
 // Function to seed User data
 func seedUsers(db *gorm.DB) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte("password"), bcrypt.DefaultCost)
+	if err != nil {
+		panic(err)
+	}
+
 	users := []*mysqlModel.User{
 		{
 			Name:    "User1",
+			Email:   "User1@yopmail.com",
 			Balance: decimal.NewFromFloat(100.00),
+			Password: string(hashedPassword),
+			IsAdmin: true,
 		},
 		{
 			Name:    "User2",
+			Email:   "User2@yopmail.com",
 			Balance: decimal.NewFromFloat(200.00),
+			Password: string(hashedPassword),
+			IsAdmin: false,
 		},
 		{
 			Name:    "User3",
+			Email:   "User3@yopmail.com",
 			Balance: decimal.NewFromFloat(300.00),
+			Password: string(hashedPassword),
+			IsAdmin: false,
 		},
 	}
 
@@ -146,8 +162,11 @@ func seedUsers(db *gorm.DB) {
 		// Only create the user if it does not already exist
 		if result.Error != nil && result.Error == gorm.ErrRecordNotFound {
 			newUser := mysqlModel.User{
-				Name:    user.Name,
-				Balance: user.Balance,
+				Name:     user.Name,
+				Email:    user.Email,
+				Balance:  user.Balance,
+				Password: user.Password,
+				IsAdmin:  user.IsAdmin,
 			}
 			db.Create(&newUser)
 		}

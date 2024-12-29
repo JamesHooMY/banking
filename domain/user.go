@@ -12,19 +12,23 @@ import (
 
 type IUserHandler interface {
 	CreateUser() gin.HandlerFunc
-	GetUser() gin.HandlerFunc
+	// GetUser() gin.HandlerFunc
 	GetUsers() gin.HandlerFunc
+	Login() gin.HandlerFunc
+	CreateAPIKey() gin.HandlerFunc
+	DeleteAPIKey() gin.HandlerFunc
+	GetAPIKeys() gin.HandlerFunc
 }
 
 type IUserService interface {
 	CreateUser(ctx context.Context, user *mysqlModel.User) (err error)
-	GetUser(ctx context.Context, userID uint) (user *mysqlModel.User, err error)
-	GetUsers(ctx context.Context) (users []*mysqlModel.User, err error)
+	GetUsers(ctx context.Context, userID uint) (users []*mysqlModel.User, err error)
+	Login(ctx context.Context, email, password string) (token string, err error)
 }
 
 type IUserQueryRepo interface {
-	GetUser(ctx context.Context, userID uint) (user *mysqlModel.User, err error)
-	GetUsers(ctx context.Context) (users []*mysqlModel.User, err error)
+	GetUsers(ctx context.Context, userID uint) (users []*mysqlModel.User, err error)
+	GetUserByEmail(ctx context.Context, email string) (user *mysqlModel.User, err error)
 }
 
 type IUserCommandRepo interface {

@@ -1,33 +1,33 @@
 version: '3.1'
 
 services:
-    myapp:
-        build:
-            context: ../
-            dockerfile: Dockerfile
-        container_name: myapp
-        ports:
-            - '8080:8080'
-        environment:
-            APP_ENV: docker
-        depends_on:
-            mysql-master:
-                condition: service_healthy
-            mysql-slave:
-                condition: service_healthy
-            elasticsearch:
-                condition: service_healthy
-            kibana:
-                condition: service_healthy
-            apm_server:
-                condition: service_healthy
-        healthcheck:
-            test: ['CMD', 'nc', '-z', 'localhost', '8080']
-            interval: 10s
-            timeout: 5s
-            retries: 3
-        networks:
-            - mynetwork
+    # myapp:
+    #     build:
+    #         context: ../
+    #         dockerfile: Dockerfile
+    #     container_name: myapp
+    #     ports:
+    #         - '8080:8080'
+    #     environment:
+    #         APP_ENV: docker
+    #     depends_on:
+    #         mysql-master:
+    #             condition: service_healthy
+    #         mysql-slave:
+    #             condition: service_healthy
+    #         elasticsearch:
+    #             condition: service_healthy
+    #         kibana:
+    #             condition: service_healthy
+    #         apm_server:
+    #             condition: service_healthy
+    #     healthcheck:
+    #         test: ['CMD', 'nc', '-z', 'localhost', '8080']
+    #         interval: 10s
+    #         timeout: 5s
+    #         retries: 3
+    #     networks:
+    #         - mynetwork
 
     mysql-master:
         image: mysql:8.0
@@ -72,65 +72,65 @@ services:
             - ./mysql/slave/slave.cnf:/etc/mysql/my.cnf
             - ./mysql/slave/slave-init.sh:/docker-entrypoint-initdb.d/init.sh
 
-    bytebase:
-        image: bytebase/bytebase:latest
-        container_name: bytebase
-        # environment:
-        #     - BB_DB_HOST=mysql-master
-        #     - BB_DB_PORT=3306
-        #     - BB_DB_USER=root
-        #     - BB_DB_PASSWORD=root_password
-        #     - BB_DB_NAME=banking
-        # volumes:
-        #     - bytebase_data:/root/bytebase
-        ports:
-            - '8081:8080'
-        depends_on:
-            - mysql-master
-            - mysql-slave
-        healthcheck:
-            test: ['CMD', 'curl', '-f', 'http://localhost:8081/api/health']
-            interval: 10s
-            timeout: 5s
-            retries: 3
-        networks:
-            - mynetwork
+    # bytebase:
+    #     image: bytebase/bytebase:latest
+    #     container_name: bytebase
+    #     # environment:
+    #     #     - BB_DB_HOST=mysql-master
+    #     #     - BB_DB_PORT=3306
+    #     #     - BB_DB_USER=root
+    #     #     - BB_DB_PASSWORD=root_password
+    #     #     - BB_DB_NAME=banking
+    #     # volumes:
+    #     #     - bytebase_data:/root/bytebase
+    #     ports:
+    #         - '8081:8080'
+    #     depends_on:
+    #         - mysql-master
+    #         - mysql-slave
+    #     healthcheck:
+    #         test: ['CMD', 'curl', '-f', 'http://localhost:8081/api/health']
+    #         interval: 10s
+    #         timeout: 5s
+    #         retries: 3
+    #     networks:
+    #         - mynetwork
 
-    prometheus:
-        image: prom/prometheus
-        container_name: prometheus
-        depends_on:
-            myapp:
-                condition: service_healthy
-        restart: always
-        ports:
-            - '9090:9090'
-        healthcheck:
-            test: ['CMD', 'nc', '-z', 'localhost', '9090']
-            interval: 30s
-            timeout: 10s
-            retries: 3
-            start_period: 60s
-        networks:
-            - mynetwork
-        volumes:
-            - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    # prometheus:
+    #     image: prom/prometheus
+    #     container_name: prometheus
+    #     depends_on:
+    #         myapp:
+    #             condition: service_healthy
+    #     restart: always
+    #     ports:
+    #         - '9090:9090'
+    #     healthcheck:
+    #         test: ['CMD', 'nc', '-z', 'localhost', '9090']
+    #         interval: 30s
+    #         timeout: 10s
+    #         retries: 3
+    #         start_period: 60s
+    #     networks:
+    #         - mynetwork
+    #     volumes:
+    #         - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
 
-    grafana:
-        image: grafana/grafana
-        container_name: grafana
-        restart: always
-        ports:
-            - '3000:3000'
-        depends_on:
-            - prometheus
-        healthcheck:
-            test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/health']
-            interval: 10s
-            timeout: 5s
-            retries: 3
-        networks:
-            - mynetwork
+    # grafana:
+    #     image: grafana/grafana
+    #     container_name: grafana
+    #     restart: always
+    #     ports:
+    #         - '3000:3000'
+    #     depends_on:
+    #         - prometheus
+    #     healthcheck:
+    #         test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/health']
+    #         interval: 10s
+    #         timeout: 5s
+    #         retries: 3
+    #     networks:
+    #         - mynetwork
 
     elasticsearch:
         image: docker.elastic.co/elasticsearch/elasticsearch:7.15.2
@@ -186,45 +186,55 @@ services:
         networks:
             - mynetwork
 
-    k6:
-        build:
-            context: ./k6
-            dockerfile: Dockerfile
-        container_name: k6
-        ports:
-            - '6565:6565'
-        depends_on:
-            myapp:
-                condition: service_healthy
-        environment:
-            - BASE_URL=http://myapp:8080/api/v1
-        user: root
-        volumes:
-            - ./k6/scripts:/scripts
-            - ./k6/config.json:/config.json
-            - ./k6/results:/results
-        networks:
-            - mynetwork
+    # k6:
+    #     build:
+    #         context: ./k6
+    #         dockerfile: Dockerfile
+    #     container_name: k6
+    #     ports:
+    #         - '6565:6565'
+    #     depends_on:
+    #         myapp:
+    #             condition: service_healthy
+    #     environment:
+    #         - BASE_URL=http://myapp:8080/api/v1
+    #     user: root
+    #     volumes:
+    #         - ./k6/scripts:/scripts
+    #         - ./k6/config.json:/config.json
+    #         - ./k6/results:/results
+    #     networks:
+    #         - mynetwork
 
-    redis-cluster:
-        image: 'bitnami/redis-cluster:latest'
+    # redis-cluster:
+    #     image: 'bitnami/redis-cluster:latest'
+    #     environment:
+    #         - REDIS_PASSWORD=redis_password
+    #         - REDIS_CLUSTER=true
+    #         - REDIS_NODES=redis-cluster:7000,redis-cluster:7001,redis-cluster:7002,redis-cluster:7003,redis-cluster:7004,redis-cluster:7005
+    #     ports:
+    #         - '7000:7000'
+    #     healthcheck:
+    #         test: ['CMD', 'redis-cli', '-a', 'redis_password', 'ping']
+    #         interval: 10s
+    #         timeout: 5s
+    #         retries: 3
+    #     networks:
+    #         - mynetwork
+
+    redis:
+        image: redis:latest
+        container_name: redis
         environment:
             - REDIS_PASSWORD=redis_password
-            - REDIS_NODES=redis-cluster:7000 redis-cluster:7001 redis-cluster:7002 redis-cluster:7003 redis-cluster:7004 redis-cluster:7005
         ports:
-            - '7000:7000'
-            - '7001:7001'
-            - '7002:7002'
-            - '7003:7003'
-            - '7004:7004'
-            - '7005:7005'
+            - '6379:6379'
+        command: ["redis-server", "--requirepass", "redis_password"]
         healthcheck:
-            test: ['CMD', 'redis-cli', '-a', 'redis_password', 'ping']
+            test: ["CMD", "redis-cli", "-a", "redis_password", "ping"]
             interval: 10s
             timeout: 5s
             retries: 3
-        networks:
-            - mynetwork
 
 networks:
     mynetwork:

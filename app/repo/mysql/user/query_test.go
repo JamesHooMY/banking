@@ -12,27 +12,6 @@ import (
 	"gorm.io/gorm"
 )
 
-func Test_GetUser(t *testing.T) {
-	if err := mysqlTestDB.Migrator().DropTable(&userModel.User{}); err != nil {
-		t.Fatal(err)
-	}
-	if err := mysqlTestDB.AutoMigrate(&userModel.User{}); err != nil {
-		t.Fatal(err)
-	}
-	mysqlTestDB.Create(&userModel.User{
-		Model:   gorm.Model{ID: 1},
-		Name:    "user1",
-		Balance: decimal.NewFromFloat(100),
-	})
-
-	userQueryRepo := userRepo.NewUserQueryRepo(mysqlTestDB)
-	user, err := userQueryRepo.GetUser(context.Background(), 1)
-
-	assert.Nil(t, err)
-	assert.NotNil(t, user)
-	assert.Equal(t, "user1", user.Name)
-}
-
 func Test_GetUsers(t *testing.T) {
 	if err := mysqlTestDB.Migrator().DropTable(&userModel.User{}); err != nil {
 		t.Fatal(err)
@@ -54,7 +33,7 @@ func Test_GetUsers(t *testing.T) {
 	}, 2)
 
 	userQueryRepo := userRepo.NewUserQueryRepo(mysqlTestDB)
-	users, err := userQueryRepo.GetUsers(context.Background())
+	users, err := userQueryRepo.GetUsers(context.Background(), 0)
 
 	assert.Nil(t, err)
 	assert.NotNil(t, users)

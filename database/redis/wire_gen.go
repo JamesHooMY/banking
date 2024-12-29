@@ -12,10 +12,10 @@ import (
 
 // Injectors from wire.go:
 
-func InitRedis(ctx context.Context) (*RedisCluster, error) {
-	redisCluster, err := NewRedisCluster(ctx)
+func InitRedis(ctx context.Context) (*Redis, error) {
+	redis, err := NewRedis(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return redisCluster, nil
+	return redis, nil
 }

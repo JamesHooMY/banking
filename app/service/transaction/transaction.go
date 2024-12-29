@@ -15,10 +15,10 @@ type transactionService struct {
 	transactionQueryRepo domain.ITransactionQueryRepo
 }
 
-func NewTransactionService(transactionCmdRepo domain.ITransactionCommandRepo, transactionQueryRepo domain.ITransactionQueryRepo) domain.ITransactionService {
+func NewTransactionService(TransactionCmdRepo domain.ITransactionCommandRepo, TransactionQueryRepo domain.ITransactionQueryRepo) domain.ITransactionService {
 	return &transactionService{
-		transactionCmdRepo:   transactionCmdRepo,
-		transactionQueryRepo: transactionQueryRepo,
+		transactionCmdRepo:   TransactionCmdRepo,
+		transactionQueryRepo: TransactionQueryRepo,
 	}
 }
 

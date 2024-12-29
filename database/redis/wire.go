@@ -9,7 +9,7 @@ import (
 	"github.com/google/wire"
 )
 
-func InitRedis(ctx context.Context) (*RedisCluster, error) {
-	wire.Build(NewRedisCluster)
+func InitRedis(ctx context.Context) (*Redis, error) {
+	wire.Build(NewRedis)
 	return nil, nil
 }

@@ -7,7 +7,7 @@ import (
 
 	v1 "banking/app/api/restful/v1"
 	transactionRepo "banking/app/repo/mysql/transaction"
-	domain "banking/domain"
+	 "banking/domain"
 	"banking/global"
 
 	"github.com/gin-gonic/gin"
@@ -17,12 +17,12 @@ import (
 )
 
 type TransactionHandler struct {
-	TransactionService domain.ITransactionService
+	transactionService domain.ITransactionService
 }
 
-func NewTransactionHandler(transactionService domain.ITransactionService) domain.ITransactionHandler {
+func NewTransactionHandler(TransactionService domain.ITransactionService) domain.ITransactionHandler {
 	return &TransactionHandler{
-		TransactionService: transactionService,
+		transactionService: TransactionService,
 	}
 }
 
@@ -52,7 +52,7 @@ func (h *TransactionHandler) Transfer() gin.HandlerFunc {
 			return
 		}
 
-		user, err := h.TransactionService.Transfer(ctx, input.FromUserID, input.ToUserID, decimal.NewFromFloat(input.Amount))
+		user, err := h.transactionService.Transfer(ctx, input.FromUserID, input.ToUserID, decimal.NewFromFloat(input.Amount))
 		if err != nil {
 			if errors.Is(err, transactionRepo.ErrInsufficientBalance) {
 				apm.CaptureError(ctx, err).Send()
@@ -95,7 +95,7 @@ func (h *TransactionHandler) Deposit() gin.HandlerFunc {
 			return
 		}
 
-		user, err := h.TransactionService.Deposit(ctx, input.UserID, decimal.NewFromFloat(input.Amount))
+		user, err := h.transactionService.Deposit(ctx, input.UserID, decimal.NewFromFloat(input.Amount))
 		if err != nil {
 			apm.CaptureError(ctx, err).Send()
 			c.AbortWithStatusJSON(http.StatusInternalServerError, &v1.ErrResponse{
@@ -130,7 +130,7 @@ func (h *TransactionHandler) Withdraw() gin.HandlerFunc {
 			return
 		}
 
-		user, err := h.TransactionService.Withdraw(ctx, input.UserID, decimal.NewFromFloat(input.Amount))
+		user, err := h.transactionService.Withdraw(ctx, input.UserID, decimal.NewFromFloat(input.Amount))
 		if err != nil {
 			if errors.Is(err, transactionRepo.ErrInsufficientBalance) {
 				apm.CaptureError(ctx, err).Send()
@@ -160,7 +160,7 @@ func (h *TransactionHandler) GetTransactions() gin.HandlerFunc {
 		span, ctx := apm.StartSpan(c.Request.Context(), "TransactionHandler.GetTransactions", "handler")
 		defer span.End()
 
-		transactions, err := h.TransactionService.GetTransactions(ctx)
+		transactions, err := h.transactionService.GetTransactions(ctx)
 		if err != nil {
 			apm.CaptureError(ctx, err).Send()
 			c.AbortWithStatusJSON(http.StatusInternalServerError, &v1.ErrResponse{
