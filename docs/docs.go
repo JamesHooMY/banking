@@ -15,7 +15,87 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/v1/user": {
+        "/api/v1/user/apikey": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create API Key",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Create API Key",
+                "responses": {
+                    "201": {
+                        "description": "success created api key",
+                        "schema": {
+                            "$ref": "#/definitions/user.CreateAPIKeyResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.ErrResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/user/login": {
+            "post": {
+                "description": "Login",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Login",
+                "parameters": [
+                    {
+                        "description": "login request",
+                        "name": "LoginReq",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.LoginReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "$ref": "#/definitions/user.LoginResp"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/v1.ErrResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/v1.ErrResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/user/register": {
             "post": {
                 "description": "Create User",
                 "consumes": [
@@ -39,8 +119,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "success",
+                    "201": {
+                        "description": "success created user",
                         "schema": {
                             "$ref": "#/definitions/user.CreateUserResp"
                         }
@@ -60,9 +140,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/user/{id}": {
+        "/api/v1/user/{userId}": {
             "get": {
-                "description": "Get User",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get Users",
                 "consumes": [
                     "application/json"
                 ],
@@ -72,31 +157,82 @@ const docTemplate = `{
                 "tags": [
                     "User"
                 ],
-                "summary": "Get User",
+                "summary": "Get Users",
                 "parameters": [
                     {
                         "type": "integer",
                         "description": "user id",
-                        "name": "id",
+                        "name": "userId",
                         "in": "path",
                         "required": true
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "$ref": "#/definitions/user.GetUsersResp"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/v1.ErrResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.ErrResponse"
+                        }
+                    }
+                }
             }
         }
     },
     "definitions": {
+        "user.APIKey": {
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string"
+                },
+                "secret": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "user.CreateAPIKeyResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/user.APIKey"
+                }
+            }
+        },
         "user.CreateUserReq": {
             "type": "object",
             "required": [
-                "name"
+                "email",
+                "name",
+                "password"
             ],
             "properties": {
+                "email": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string",
                     "maxLength": 20,
                     "minLength": 3
+                },
+                "password": {
+                    "type": "string",
+                    "maxLength": 20,
+                    "minLength": 8
                 }
             }
         },
@@ -105,8 +241,41 @@ const docTemplate = `{
             "properties": {
                 "data": {
                     "$ref": "#/definitions/user.User"
+                }
+            }
+        },
+        "user.GetUsersResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/user.User"
+                    }
+                }
+            }
+        },
+        "user.LoginReq": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
                 },
-                "msg": {
+                "password": {
+                    "type": "string",
+                    "maxLength": 20,
+                    "minLength": 8
+                }
+            }
+        },
+        "user.LoginResp": {
+            "type": "object",
+            "properties": {
+                "token": {
                     "type": "string"
                 }
             }
@@ -116,6 +285,9 @@ const docTemplate = `{
             "properties": {
                 "balance": {
                     "type": "number"
+                },
+                "email": {
+                    "type": "string"
                 },
                 "id": {
                     "type": "integer"
@@ -128,7 +300,6 @@ const docTemplate = `{
         "v1.ErrResponse": {
             "type": "object",
             "properties": {
-                "data": {},
                 "msg": {
                     "type": "string"
                 }

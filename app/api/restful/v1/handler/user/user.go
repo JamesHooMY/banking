@@ -30,7 +30,7 @@ func NewUserHandler(UserService domain.IUserService, APIKeyService domain.IAPIKe
 }
 
 // @Tags User
-// @Router /api/v1/user [post]
+// @Router /api/v1/user/register [post]
 // @Summary Create User
 // @Description Create User
 // @Accept json
@@ -85,12 +85,19 @@ func (h *UserHandler) CreateUser() gin.HandlerFunc {
 	}
 }
 
+// @Tags User
+// @Router /api/v1/user/login [post]
+// @Summary Login
+// @Description Login
+// @Accept json
+// @Produce json
+// @Param LoginReq body LoginReq true "login request"
+// @Success 200 {object} LoginResp "success"
+// @Failure 400 {object} v1.ErrResponse "bad request"
+// @Failure 401 {object} v1.ErrResponse "unauthorized"
 func (h *UserHandler) Login() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var input struct {
-			Email    string `json:"email" binding:"required,email"`
-			Password string `json:"password" binding:"required,min=8,max=20"`
-		}
+		var input LoginReq
 
 		// Bind JSON input
 		if err := c.ShouldBindJSON(&input); err != nil {
@@ -105,65 +112,23 @@ func (h *UserHandler) Login() gin.HandlerFunc {
 		}
 
 		// Return JWT token
-		c.JSON(http.StatusOK, gin.H{"token": token})
+		c.JSON(http.StatusOK, &LoginResp{
+			Token: token,
+		})
 	}
 }
 
 // @Tags User
-// @Router /api/v1/user/{id} [get]
-// @Summary Get User
-// @Description Get User
+// @Router /api/v1/user/{userId} [get]
+// @Summary Get Users
+// @Description Get Users
 // @Accept json
 // @Produce json
-// @Param id path int true "user id"
-// @Success 200 {object} GetUserResp "success"
+// @Security BearerAuth
+// @Param userId path uint true "user id"
+// @Success 200 {object} GetUsersResp "success"
 // @Failure 400 {object} v1.ErrResponse "bad request"
 // @Failure 500 {object} v1.ErrResponse "internal server error"
-// func (h *UserHandler) GetUser() gin.HandlerFunc {
-// 	return func(c *gin.Context) {
-// 		span, ctx := apm.StartSpan(c.Request.Context(), "UserHandler.GetUser", "handler")
-// 		defer span.End()
-
-// 		id := c.Param("id")
-
-// 		userID, err := strconv.ParseUint(id, 10, 64)
-// 		if err != nil {
-// 			apm.CaptureError(ctx, err).Send()
-// 			c.AbortWithStatusJSON(http.StatusBadRequest, &v1.ErrResponse{
-// 				Msg: "invalid user id",
-// 			})
-// 			return
-// 		}
-
-// 		authedUserId := c.GetUint("authedUserId")
-// 		if uint(userID) != authedUserId {
-// 			apm.CaptureError(ctx, fmt.Errorf("unauthorized")).Send()
-// 			c.AbortWithStatusJSON(http.StatusUnauthorized, &v1.ErrResponse{
-// 				Msg: "unauthorized",
-// 			})
-// 			return
-// 		}
-
-// 		user, err := h.UserService.GetUser(ctx, uint(userID))
-// 		if err != nil {
-// 			apm.CaptureError(ctx, err).Send()
-// 			c.AbortWithStatusJSON(http.StatusInternalServerError, &v1.ErrResponse{
-// 				Msg: err.Error(),
-// 			})
-// 			return
-// 		}
-
-// 		c.JSON(http.StatusOK, &GetUserResp{
-// 			Data: &User{
-// 				ID:      user.ID,
-// 				Name:    user.Name,
-// 				Email:   user.Email,
-// 				Balance: user.Balance,
-// 			},
-// 		})
-// 	}
-// }
-
 func (h *UserHandler) GetUsers() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		span, ctx := apm.StartSpan(c.Request.Context(), "UserHandler.GetUsers", "handler")
@@ -209,6 +174,15 @@ func (h *UserHandler) GetUsers() gin.HandlerFunc {
 	}
 }
 
+// @Tags User
+// @Router /api/v1/user/apikey [post]
+// @Summary Create API Key
+// @Description Create API Key
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 201 {object} CreateAPIKeyResp "success created api key"
+// @Failure 500 {object} v1.ErrResponse "internal server error"
 func (h *UserHandler) CreateAPIKey() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		span, ctx := apm.StartSpan(c.Request.Context(), "UserHandler.CreateAPIKey", "handler")
