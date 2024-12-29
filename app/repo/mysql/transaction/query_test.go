@@ -9,6 +9,7 @@ import (
 
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
+	"gorm.io/gorm"
 )
 
 func Test_GetTransactions(t *testing.T) {
@@ -26,23 +27,32 @@ func Test_GetTransactions(t *testing.T) {
 	}
 
 	user := &mysqlModel.User{
-		Name:    "user1",
-		Balance: decimal.NewFromFloat(100.00).Round(2),
+		Model:    gorm.Model{ID: 1},
+		Name:     "user1",
+		Email:    "user1@yopmail",
+		Password: "password",
+		Balance:  decimal.NewFromFloat(100),
 	}
-	mysqlTestDB.Create(user)
+
+	if err := mysqlTestDB.Create(user).Error; err != nil {
+		t.Fatal(err)
+	}
 
 	expectedTransaction := &mysqlModel.Transaction{
-		FromUserID:      user.ID,
-		ToUserID:        user.ID,
-		Amount:          decimal.NewFromFloat(100.00).Round(2),
-		FromUserBalance: user.Balance,
-		ToUserBalance:   user.Balance.Add(decimal.NewFromFloat(100.00)).Round(2),
+		FromUserID:      user.Model.ID,
+		ToUserID:        user.Model.ID,
+		Amount:          decimal.NewFromFloat(100),
+		FromUserBalance: user.Balance.Add(decimal.NewFromFloat(100)),
+		ToUserBalance:   user.Balance.Add(decimal.NewFromFloat(100)),
 		TransactionType: mysqlModel.Deposit,
 	}
-	mysqlTestDB.Create(expectedTransaction)
+
+	if err := mysqlTestDB.Create(expectedTransaction).Error; err != nil {
+		t.Fatal(err)
+	}
 
 	transactionQueryRepo := transactionRepo.NewTransactionQueryRepo(mysqlTestDB)
-	transactions, err := transactionQueryRepo.GetTransactions(context.Background(), user.ID)
+	transactions, err := transactionQueryRepo.GetTransactions(context.Background(), user.Model.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -52,8 +62,8 @@ func Test_GetTransactions(t *testing.T) {
 	assert.Equal(t, 1, len(transactions))
 	assert.Equal(t, expectedTransaction.FromUserID, transactions[0].FromUserID)
 	assert.Equal(t, expectedTransaction.ToUserID, transactions[0].ToUserID)
-	assert.Equal(t, expectedTransaction.Amount, transactions[0].Amount)
-	assert.Equal(t, expectedTransaction.FromUserBalance, transactions[0].FromUserBalance)
-	assert.Equal(t, expectedTransaction.ToUserBalance, transactions[0].ToUserBalance)
+	assert.True(t, expectedTransaction.Amount.Equal(transactions[0].Amount))
+	assert.True(t, expectedTransaction.FromUserBalance.Equal(transactions[0].FromUserBalance))
+	assert.True(t, expectedTransaction.ToUserBalance.Equal(transactions[0].ToUserBalance))
 	assert.Equal(t, expectedTransaction.TransactionType, transactions[0].TransactionType)
 }

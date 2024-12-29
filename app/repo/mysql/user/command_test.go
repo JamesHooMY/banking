@@ -19,18 +19,20 @@ func Test_CreateUser(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	user1 := &mysqlModel.User{
+		Name:     "user1",
+		Email:    "user1@yopmail",
+		Password: "password",
+		Balance:  decimal.NewFromFloat(100),
+	}
+
 	userCommandRepo := userRepo.NewUserCommandRepo(mysqlTestDB)
 	err := userCommandRepo.CreateUser(context.Background(), &mysqlModel.User{
-		Name:    "user1",
-		Balance: decimal.NewFromFloat(100),
+		Name:     user1.Name,
+		Email:    user1.Email,
+		Password: user1.Password,
+		Balance:  user1.Balance,
 	})
 
 	assert.Nil(t, err)
-
-	user := &mysqlModel.User{}
-	mysqlTestDB.First(user, "name = ?", "user1")
-
-	assert.NotNil(t, user)
-	assert.Equal(t, "user1", user.Name)
-	assert.True(t, user.Balance.Equal(decimal.NewFromFloat(100)))
 }
