@@ -22,30 +22,30 @@ func NewTransactionService(TransactionCmdRepo domain.ITransactionCommandRepo, Tr
 	}
 }
 
-func (s *transactionService) Transfer(ctx context.Context, fromUserID, toUserID uint, amount decimal.Decimal) (user *mysqlModel.User, err error) {
+func (s *transactionService) Transfer(ctx context.Context, fromUserID, toUserID uint, amount decimal.Decimal) (transaction *mysqlModel.Transaction, err error) {
 	span, ctx := apm.StartSpan(ctx, "userService.Transfer", "service")
 	defer span.End()
 
 	return s.transactionCmdRepo.Transfer(ctx, fromUserID, toUserID, amount)
 }
 
-func (s *transactionService) Deposit(ctx context.Context, userID uint, amount decimal.Decimal) (user *mysqlModel.User, err error) {
+func (s *transactionService) Deposit(ctx context.Context, userID uint, amount decimal.Decimal) (transaction *mysqlModel.Transaction, err error) {
 	span, ctx := apm.StartSpan(ctx, "userService.Deposit", "service")
 	defer span.End()
 
 	return s.transactionCmdRepo.Deposit(ctx, userID, amount)
 }
 
-func (s *transactionService) Withdraw(ctx context.Context, userID uint, amount decimal.Decimal) (user *mysqlModel.User, err error) {
+func (s *transactionService) Withdraw(ctx context.Context, userID uint, amount decimal.Decimal) (transaction *mysqlModel.Transaction, err error) {
 	span, ctx := apm.StartSpan(ctx, "userService.Withdraw", "service")
 	defer span.End()
 
 	return s.transactionCmdRepo.Withdraw(ctx, userID, amount)
 }
 
-func (s *transactionService) GetTransactions(ctx context.Context) (transactions []*mysqlModel.Transaction, err error) {
+func (s *transactionService) GetTransactions(ctx context.Context, userID uint) (transactions []*mysqlModel.Transaction, err error) {
 	span, ctx := apm.StartSpan(ctx, "userService.GetTransactions", "service")
 	defer span.End()
 
-	return s.transactionQueryRepo.GetTransactions(ctx)
+	return s.transactionQueryRepo.GetTransactions(ctx, userID)
 }

@@ -135,8 +135,8 @@ func (h *UserHandler) Login() gin.HandlerFunc {
 // 			return
 // 		}
 
-// 		authUserId := c.GetUint("authUserId")
-// 		if uint(userID) != authUserId {
+// 		authedUserId := c.GetUint("authedUserId")
+// 		if uint(userID) != authedUserId {
 // 			apm.CaptureError(ctx, fmt.Errorf("unauthorized")).Send()
 // 			c.AbortWithStatusJSON(http.StatusUnauthorized, &v1.ErrResponse{
 // 				Msg: "unauthorized",
@@ -170,16 +170,16 @@ func (h *UserHandler) GetUsers() gin.HandlerFunc {
 		defer span.End()
 
 		userId := c.Param("userId")
-		authUserId := c.GetUint("authUserId")
+		authedUserId := c.GetUint("authedUserId")
 
-		idUint, err := strconv.ParseUint(userId, 10, 64)
+		userIdUint, err := strconv.ParseUint(userId, 10, 64)
 		if err != nil {
 			apm.CaptureError(ctx, err).Send()
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid user id"})
 			return
 		}
 
-		if !c.GetBool("isAdmin") && authUserId != uint(idUint) {
+		if !c.GetBool("isAdmin") && authedUserId != uint(userIdUint) {
 			apm.CaptureError(ctx, fmt.Errorf("unauthorized")).Send()
 			c.AbortWithStatusJSON(http.StatusUnauthorized, &v1.ErrResponse{
 				Msg: "unauthorized",
@@ -187,7 +187,7 @@ func (h *UserHandler) GetUsers() gin.HandlerFunc {
 			return
 		}
 
-		users, err := h.userService.GetUsers(ctx, uint(idUint))
+		users, err := h.userService.GetUsers(ctx, uint(userIdUint))
 		if err != nil {
 			apm.CaptureError(ctx, err).Send()
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -214,8 +214,8 @@ func (h *UserHandler) CreateAPIKey() gin.HandlerFunc {
 		span, ctx := apm.StartSpan(c.Request.Context(), "UserHandler.CreateAPIKey", "handler")
 		defer span.End()
 
-		authUserId := c.GetUint("authUserId")
-		apiKey, secretKey, err := h.apiKeyService.CreateAPIKey(ctx, authUserId)
+		authedUserId := c.GetUint("authedUserId")
+		apiKey, secretKey, err := h.apiKeyService.CreateAPIKey(ctx, authedUserId)
 		if err != nil {
 			apm.CaptureError(ctx, err).Send()
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -226,7 +226,7 @@ func (h *UserHandler) CreateAPIKey() gin.HandlerFunc {
 			Data: &APIKey{
 				Key:    apiKey,
 				Secret: secretKey,
-				UserID: authUserId,
+				UserID: authedUserId,
 			},
 		})
 	}
@@ -247,8 +247,8 @@ func (h *UserHandler) DeleteAPIKey() gin.HandlerFunc {
 			return
 		}
 
-		authUserId := c.GetUint("authUserId")
-		if err := h.apiKeyService.DeleteAPIKey(ctx, authUserId, input.Key); err != nil {
+		authedUserId := c.GetUint("authedUserId")
+		if err := h.apiKeyService.DeleteAPIKey(ctx, authedUserId, input.Key); err != nil {
 			apm.CaptureError(ctx, err).Send()
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -273,9 +273,9 @@ func (h *UserHandler) GetAPIKeys() gin.HandlerFunc {
 		}
 
 		isAdmin := c.GetBool("isAdmin")
-		authUserId := c.GetUint("authUserId")
+		authedUserId := c.GetUint("authedUserId")
 
-		if !isAdmin && authUserId != uint(userIdUint) {
+		if !isAdmin && authedUserId != uint(userIdUint) {
 			apm.CaptureError(ctx, fmt.Errorf("unauthorized")).Send()
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 			return

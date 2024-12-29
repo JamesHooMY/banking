@@ -4,10 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	v1 "banking/app/api/restful/v1"
 	transactionRepo "banking/app/repo/mysql/transaction"
-	 "banking/domain"
+	"banking/domain"
 	"banking/global"
 
 	"github.com/gin-gonic/gin"
@@ -45,6 +46,13 @@ func (h *TransactionHandler) Transfer() gin.HandlerFunc {
 			return
 		}
 
+		if input.FromUserID != c.GetUint("authedUserId") {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, &v1.ErrResponse{
+				Msg: "fromUserId is not authorized",
+			})
+			return
+		}
+
 		if input.FromUserID == input.ToUserID {
 			c.AbortWithStatusJSON(http.StatusBadRequest, &v1.ErrResponse{
 				Msg: "fromUserId and toUserId should not be the same",
@@ -52,7 +60,7 @@ func (h *TransactionHandler) Transfer() gin.HandlerFunc {
 			return
 		}
 
-		user, err := h.transactionService.Transfer(ctx, input.FromUserID, input.ToUserID, decimal.NewFromFloat(input.Amount))
+		transaction, err := h.transactionService.Transfer(ctx, input.FromUserID, input.ToUserID, decimal.NewFromFloat(input.Amount))
 		if err != nil {
 			if errors.Is(err, transactionRepo.ErrInsufficientBalance) {
 				apm.CaptureError(ctx, err).Send()
@@ -72,7 +80,14 @@ func (h *TransactionHandler) Transfer() gin.HandlerFunc {
 		global.Logger.With(apmzap.TraceContext(ctx)).Info(fmt.Sprintf("[Transfer]: fromUserId: %d, toUserId: %d, amount: %f", input.FromUserID, input.ToUserID, input.Amount))
 
 		c.JSON(http.StatusOK, &TransferResp{
-			Data: user,
+			Data: &Transaction{
+				FromUserID:      transaction.FromUserID,
+				FromUserBalance: transaction.FromUserBalance,
+				ToUserID:        transaction.ToUserID,
+				Amount:          transaction.Amount,
+				TransactionType: transaction.TransactionType,
+				Details:         transaction.Details,
+			},
 		})
 	}
 }
@@ -95,7 +110,15 @@ func (h *TransactionHandler) Deposit() gin.HandlerFunc {
 			return
 		}
 
-		user, err := h.transactionService.Deposit(ctx, input.UserID, decimal.NewFromFloat(input.Amount))
+		authedUserID := c.GetUint("authedUserId")
+		if input.UserID != authedUserID {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, &v1.ErrResponse{
+				Msg: "userId is not authorized",
+			})
+			return
+		}
+
+		transaction, err := h.transactionService.Deposit(ctx, input.UserID, decimal.NewFromFloat(input.Amount))
 		if err != nil {
 			apm.CaptureError(ctx, err).Send()
 			c.AbortWithStatusJSON(http.StatusInternalServerError, &v1.ErrResponse{
@@ -107,7 +130,15 @@ func (h *TransactionHandler) Deposit() gin.HandlerFunc {
 		global.Logger.With(apmzap.TraceContext(ctx)).Info(fmt.Sprintf("[Deposit]: userId: %d, amount: %f", input.UserID, input.Amount))
 
 		c.JSON(http.StatusOK, &DepositResp{
-			Data: user,
+			Data: &Transaction{
+				FromUserID:      transaction.FromUserID,
+				FromUserBalance: transaction.FromUserBalance,
+				ToUserID:        transaction.ToUserID,
+				ToUserBalance:   transaction.ToUserBalance,
+				Amount:          transaction.Amount,
+				TransactionType: transaction.TransactionType,
+				Details:         transaction.Details,
+			},
 		})
 	}
 }
@@ -130,7 +161,15 @@ func (h *TransactionHandler) Withdraw() gin.HandlerFunc {
 			return
 		}
 
-		user, err := h.transactionService.Withdraw(ctx, input.UserID, decimal.NewFromFloat(input.Amount))
+		authedUserID := c.GetUint("authedUserId")
+		if input.UserID != authedUserID {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, &v1.ErrResponse{
+				Msg: "userId is not authorized",
+			})
+			return
+		}
+
+		transaction, err := h.transactionService.Withdraw(ctx, input.UserID, decimal.NewFromFloat(input.Amount))
 		if err != nil {
 			if errors.Is(err, transactionRepo.ErrInsufficientBalance) {
 				apm.CaptureError(ctx, err).Send()
@@ -150,7 +189,15 @@ func (h *TransactionHandler) Withdraw() gin.HandlerFunc {
 		global.Logger.With(apmzap.TraceContext(ctx)).Info(fmt.Sprintf("[Withdraw]: userId: %d, amount: %f", input.UserID, input.Amount))
 
 		c.JSON(http.StatusOK, &WithdrawResp{
-			Data: user,
+			Data: &Transaction{
+				FromUserID:      transaction.FromUserID,
+				FromUserBalance: transaction.FromUserBalance,
+				ToUserID:        transaction.ToUserID,
+				ToUserBalance:   transaction.ToUserBalance,
+				Amount:          transaction.Amount,
+				TransactionType: transaction.TransactionType,
+				Details:         transaction.Details,
+			},
 		})
 	}
 }
@@ -160,7 +207,27 @@ func (h *TransactionHandler) GetTransactions() gin.HandlerFunc {
 		span, ctx := apm.StartSpan(c.Request.Context(), "TransactionHandler.GetTransactions", "handler")
 		defer span.End()
 
-		transactions, err := h.transactionService.GetTransactions(ctx)
+		userId := c.Param("userId")
+		authedUserID := c.GetUint("authedUserId")
+
+		userIdUint, err := strconv.ParseUint(userId, 10, 64)
+		if err != nil {
+			apm.CaptureError(ctx, err).Send()
+			c.AbortWithStatusJSON(http.StatusBadRequest, &v1.ErrResponse{
+				Msg: "invalid user id",
+			})
+			return
+		}
+
+		if uint(userIdUint) != authedUserID {
+			apm.CaptureError(ctx, fmt.Errorf("unauthorized")).Send()
+			c.AbortWithStatusJSON(http.StatusUnauthorized, &v1.ErrResponse{
+				Msg: "unauthorized",
+			})
+			return
+		}
+
+		transactions, err := h.transactionService.GetTransactions(ctx, uint(userIdUint))
 		if err != nil {
 			apm.CaptureError(ctx, err).Send()
 			c.AbortWithStatusJSON(http.StatusInternalServerError, &v1.ErrResponse{
@@ -171,8 +238,19 @@ func (h *TransactionHandler) GetTransactions() gin.HandlerFunc {
 
 		global.Logger.With(apmzap.TraceContext(ctx)).Info(fmt.Sprintf("[GetTransactions]: transactions: %v", transactions))
 
+		transactionList := make([]*Transaction, 0, len(transactions))
+		for _, t := range transactions {
+			transactionList = append(transactionList, &Transaction{
+				FromUserID:      t.FromUserID,
+				FromUserBalance: t.FromUserBalance,
+				ToUserID:        t.ToUserID,
+				Amount:          t.Amount,
+				TransactionType: t.TransactionType,
+				Details:         t.Details,
+			})
+		}
 		c.JSON(http.StatusOK, &GetTransactionsResp{
-			Data: transactions,
+			Data: transactionList,
 		})
 	}
 }

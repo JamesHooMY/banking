@@ -86,7 +86,7 @@ func InitRouter(router *gin.Engine, masterDB *gorm.DB, slaveDB *gorm.DB, redisCl
 	transaction.POST("/transfer", transactionHandler.Transfer())
 	transaction.POST("/deposit", transactionHandler.Deposit())
 	transaction.POST("/withdraw", transactionHandler.Withdraw())
-	transaction.GET("", transactionHandler.GetTransactions())
+	transaction.GET("/:userId", transactionHandler.GetTransactions())
 
 	return router
 }

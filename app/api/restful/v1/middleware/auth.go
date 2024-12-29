@@ -39,7 +39,7 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 		}
 
 		// Set user info in context
-		c.Set("authUserId", claims.UserID)
+		c.Set("authedUserId", claims.UserID)
 		c.Set("isAdmin", claims.IsAdmin)
 		c.Set("email", claims.Email)
 		c.Next()
@@ -78,7 +78,9 @@ func APIKeyAuthMiddleware(
 			return
 		}
 
-		c.Set("authUserId", uint(userID))
+		c.Set("authedUserId", uint(userID))
+		c.Set("apiKey", key)
+		c.Set("secretKey", secretKey)
 
 		// Continue processing the request
 		c.Next()

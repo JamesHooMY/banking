@@ -21,7 +21,7 @@ func NewTransactionCommandRepo(db *gorm.DB) domain.ITransactionCommandRepo {
 	}
 }
 
-func (r *transactionCommandRepo) Transfer(ctx context.Context, fromUserID, toUserID uint, amount decimal.Decimal) (user *mysqlModel.User, err error) {
+func (r *transactionCommandRepo) Transfer(ctx context.Context, fromUserID, toUserID uint, amount decimal.Decimal) (transaction *mysqlModel.Transaction, err error) {
 	span, ctx := apm.StartSpan(ctx, "userCommandRepo.Transfer", "repo")
 	defer span.End()
 
@@ -66,7 +66,7 @@ func (r *transactionCommandRepo) Transfer(ctx context.Context, fromUserID, toUse
 		return nil, err
 	}
 
-	transaction := &mysqlModel.Transaction{
+	transaction = &mysqlModel.Transaction{
 		FromUserID:      fromUserID,
 		ToUserID:        toUserID,
 		Amount:          amount,
@@ -86,10 +86,10 @@ func (r *transactionCommandRepo) Transfer(ctx context.Context, fromUserID, toUse
 		return nil, err
 	}
 
-	return fromUser, nil
+	return transaction, nil
 }
 
-func (r *transactionCommandRepo) Deposit(ctx context.Context, userID uint, amount decimal.Decimal) (user *mysqlModel.User, err error) {
+func (r *transactionCommandRepo) Deposit(ctx context.Context, userID uint, amount decimal.Decimal) (transaction *mysqlModel.Transaction, err error) {
 	span, ctx := apm.StartSpan(ctx, "userCommandRepo.Deposit", "repo")
 	defer span.End()
 
@@ -98,7 +98,7 @@ func (r *transactionCommandRepo) Deposit(ctx context.Context, userID uint, amoun
 		return nil, err
 	}
 
-	user = &mysqlModel.User{}
+	user := &mysqlModel.User{}
 	result := tx.Model(&mysqlModel.User{}).Where("id = ?", userID).First(user)
 	if err := result.Error; err != nil {
 		tx.Rollback()
@@ -114,7 +114,7 @@ func (r *transactionCommandRepo) Deposit(ctx context.Context, userID uint, amoun
 		return nil, err
 	}
 
-	transaction := &mysqlModel.Transaction{
+	transaction = &mysqlModel.Transaction{
 		FromUserID:      userID,
 		ToUserID:        userID,
 		Amount:          amount,
@@ -134,10 +134,10 @@ func (r *transactionCommandRepo) Deposit(ctx context.Context, userID uint, amoun
 		return nil, err
 	}
 
-	return user, nil
+	return transaction, nil
 }
 
-func (r *transactionCommandRepo) Withdraw(ctx context.Context, userID uint, amount decimal.Decimal) (user *mysqlModel.User, err error) {
+func (r *transactionCommandRepo) Withdraw(ctx context.Context, userID uint, amount decimal.Decimal) (transaction *mysqlModel.Transaction, err error) {
 	span, ctx := apm.StartSpan(ctx, "userCommandRepo.Withdraw", "repo")
 	defer span.End()
 
@@ -146,7 +146,7 @@ func (r *transactionCommandRepo) Withdraw(ctx context.Context, userID uint, amou
 		return nil, err
 	}
 
-	user = &mysqlModel.User{}
+	user := &mysqlModel.User{}
 	result := tx.Model(&mysqlModel.User{}).Where("id = ?", userID).First(user)
 	if err := result.Error; err != nil {
 		tx.Rollback()
@@ -158,6 +158,7 @@ func (r *transactionCommandRepo) Withdraw(ctx context.Context, userID uint, amou
 		return nil, ErrInsufficientBalance
 	}
 
+	beforeBalance := user.Balance
 	user.Balance = user.Balance.Sub(amount)
 
 	result = tx.Save(user)
@@ -166,11 +167,11 @@ func (r *transactionCommandRepo) Withdraw(ctx context.Context, userID uint, amou
 		return nil, err
 	}
 
-	transaction := &mysqlModel.Transaction{
+	transaction = &mysqlModel.Transaction{
 		FromUserID:      userID,
 		ToUserID:        userID,
 		Amount:          amount,
-		FromUserBalance: user.Balance,
+		FromUserBalance: beforeBalance,
 		ToUserBalance:   user.Balance,
 		TransactionType: mysqlModel.Withdraw,
 	}
@@ -186,5 +187,5 @@ func (r *transactionCommandRepo) Withdraw(ctx context.Context, userID uint, amou
 		return nil, err
 	}
 
-	return user, nil
+	return transaction, nil
 }
