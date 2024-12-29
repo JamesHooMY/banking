@@ -4,6 +4,9 @@ server:
     shutdownTimeout: 1 # second
     apiVersion: v1
 
+pprof:
+    port: 6060
+
 mysql:
     master:
         host: mysql-master:3306
@@ -37,13 +40,23 @@ elasticsearch:
     password: ""
     index: "logs-index"
 
+# redis:
+#     cluster:
+#         addrs:
+#             - "redis-cluster:7000"
+#             - "redis-cluster:7001"
+#             - "redis-cluster:7002"
+#             - "redis-cluster:7003"
+#             - "redis-cluster:7004"
+#             - "redis-cluster:7005"
+#         password: "redis_password"
+
 redis:
-    cluster:
-        addrs:
-            - "redis-cluster:7000"
-            - "redis-cluster:7001"
-            - "redis-cluster:7002"
-            - "redis-cluster:7003"
-            - "redis-cluster:7004"
-            - "redis-cluster:7005"
-        password: "redis_password"
+    addr: "redis:6379"  # Address for a single Redis instance
+    password: "redis_password"
+
+jwt:
+    secretKey: "your-secret-key"  # This key is used to sign JWT tokens. Keep it safe and private.
+    expirationTime: 24            # Token expiration time in hours
+    issuer: "banking-app"         # Token issuer (for validation)
+    audience: "banking-users"

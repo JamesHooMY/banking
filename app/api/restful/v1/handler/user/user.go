@@ -79,6 +79,7 @@ func (h *UserHandler) CreateUser() gin.HandlerFunc {
 			Data: &User{
 				ID:      user.ID,
 				Name:    user.Name,
+				Email:   user.Email,
 				Balance: user.Balance,
 			},
 		})

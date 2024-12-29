@@ -71,7 +71,7 @@ func initConfig() {
 		panic(fmt.Errorf("Fatal error config file: %s \n", err))
 	}
 
-	// log.Println("Using config file:", viper.ConfigFileUsed())
+	log.Println("Using config file:", viper.ConfigFileUsed())
 	log.Println("Server mode:", viper.Get("server.runMode"))
 
 	// set apm server env

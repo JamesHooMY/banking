@@ -2,6 +2,7 @@
 - [Banking System](#banking-system)
 - [Project structure](#project-structure)
 - [Clean Architecture](#clean-architecture)
+    - [Architecture Diagram](#architecture-diagram)
 - [Start the server](#start-the-server)
 - [Stop the server](#stop-the-server)
 - [Add New Restful api](#add-new-restful-api)
@@ -9,7 +10,7 @@
     - [Add new handler for user](#add-new-handler-for-user)
     - [Add new service for user](#add-new-service-for-user)
     - [Add new repo for user using mysql database](#add-new-repo-for-user-using-mysql-database)
-- [ER Diagram](#er-diagram)
+- [Database ER Diagram](#database-er-diagram)
 
 # Project structure
 ```
@@ -102,10 +103,13 @@ banking/
 # Clean Architecture
 * This application is designed with Clean Architecture, including 5 layers:
     1. Handler: This layer is responsible for handling the request and response.
+       * DTO: This is responsible for the data structure used in handler.
     2. Service: This layer is responsible for the business logic.
     3. Repository: This layer is responsible for the data access.
-    4. Model: This layer is responsible for the data structure used in data access.
-    5. Domain: This layer is responsible for the interface and the data structure used in handler, service, and repository.
+       * Model: This is responsible for the data structure used in data access.
+    4. Domain: This layer is responsible for the interface used in handler, service, and repository.
+
+### Architecture Diagram
 ```mermaid
 %%{init: {'theme': 'dark'}}%%
 flowchart RL
@@ -180,5 +184,47 @@ make docker_down
 1. Add command repo in [app/repo/mysql/user/command.go](app/repo/mysql/user/command.go)
 2. Add command repo test in [app/repo/mysql/user/command_test.go](app/repo/mysql/user/command_test.go)
 
-# ER Diagram
-![Untitled Diagram](https://github.com/JamesHooMY/banking/assets/87403901/a929a78f-3e8a-4188-8c6f-63a8e93c83ab)
+# Database ER Diagram
+```mermaid
+%%{init: {'theme': 'dark'}}%%
+erDiagram
+    User ||--o{ APIKey : "has"
+    User ||--o{ Transaction : "is FromUser"
+    User ||--o{ Transaction : "is ToUser"
+
+    User {
+        uint ID PK
+        datetime CreatedAt
+        datetime UpdatedAt
+        datetime DeletedAt
+        string Name "varchar(20)"
+        string Email "varchar(100)"
+        string Password "varchar(255)"
+        decimal Balance "decimal(10,2)"
+        boolean IsAdmin "tinyint(1)"
+    }
+
+    APIKey {
+        uint ID PK
+        datetime CreatedAt
+        datetime UpdatedAt
+        datetime DeletedAt
+        uint UserID FK
+        string APIKey "varchar(255)"
+        string Secret "varchar(255)"
+    }
+
+    Transaction {
+        uint ID PK
+        datetime CreatedAt
+        datetime UpdatedAt
+        datetime DeletedAt
+        uint FromUserID FK
+        decimal FromUserBalance "decimal(10,2)"
+        uint ToUserID FK
+        decimal ToUserBalance "decimal(10,2)"
+        decimal Amount "decimal(10,2)"
+        enum TransactionType "enum"
+        string Details "text"
+    }
+```

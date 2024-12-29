@@ -1,33 +1,35 @@
 version: '3.1'
 
 services:
-    # myapp:
-    #     build:
-    #         context: ../
-    #         dockerfile: Dockerfile
-    #     container_name: myapp
-    #     ports:
-    #         - '8080:8080'
-    #     environment:
-    #         APP_ENV: docker
-    #     depends_on:
-    #         mysql-master:
-    #             condition: service_healthy
-    #         mysql-slave:
-    #             condition: service_healthy
-    #         elasticsearch:
-    #             condition: service_healthy
-    #         kibana:
-    #             condition: service_healthy
-    #         apm_server:
-    #             condition: service_healthy
-    #     healthcheck:
-    #         test: ['CMD', 'nc', '-z', 'localhost', '8080']
-    #         interval: 10s
-    #         timeout: 5s
-    #         retries: 3
-    #     networks:
-    #         - mynetwork
+    myapp:
+        build:
+            context: ../
+            dockerfile: Dockerfile
+        container_name: myapp
+        ports:
+            - '8080:8080'
+        environment:
+            APP_ENV: docker
+        depends_on:
+            mysql-master:
+                condition: service_healthy
+            mysql-slave:
+                condition: service_healthy
+            elasticsearch:
+                condition: service_healthy
+            kibana:
+                condition: service_healthy
+            apm_server:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+        healthcheck:
+            test: ['CMD', 'nc', '-z', 'localhost', '8080']
+            interval: 10s
+            timeout: 5s
+            retries: 3
+        networks:
+            - mynetwork
 
     mysql-master:
         image: mysql:8.0
@@ -229,9 +231,9 @@ services:
             - REDIS_PASSWORD=redis_password
         ports:
             - '6379:6379'
-        command: ["redis-server", "--requirepass", "redis_password"]
+        command: ['redis-server', '--requirepass', 'redis_password']
         healthcheck:
-            test: ["CMD", "redis-cli", "-a", "redis_password", "ping"]
+            test: ['CMD', 'redis-cli', '-a', 'redis_password', 'ping']
             interval: 10s
             timeout: 5s
             retries: 3

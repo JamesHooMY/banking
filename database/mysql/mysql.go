@@ -3,6 +3,7 @@ package mysql
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	mysqlModel "banking/model/mysql"
@@ -76,6 +77,8 @@ func initMySQL(ctx context.Context, dsn string) (*gorm.DB, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	log.Printf("Connecting to MySQL: %s\n", dsn)
 
 	var db *gorm.DB
 	err = retry(ctx, func() error {
