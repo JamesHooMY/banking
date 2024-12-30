@@ -10,6 +10,8 @@ services:
             - '8080:8080'
         environment:
             APP_ENV: docker
+        volumes:
+            - ../config/config.docker.yaml:/config/config.docker.yaml
         depends_on:
             mysql-master:
                 condition: service_healthy
@@ -237,6 +239,8 @@ services:
             interval: 10s
             timeout: 5s
             retries: 3
+        networks:
+            - mynetwork
 
 networks:
     mynetwork:

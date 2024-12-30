@@ -129,36 +129,33 @@ func retry(ctx context.Context, action func() error, attempts int, sleep time.Du
 
 // Function to seed User data
 func seedUsers(db *gorm.DB) {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte("password"), bcrypt.DefaultCost)
-	if err != nil {
-		panic(err)
-	}
-
 	users := []*mysqlModel.User{
 		{
-			Name:     "user1",
-			Email:    "user1@yopmail.com",
-			Balance:  decimal.NewFromFloat(100.00),
-			Password: string(hashedPassword),
-			IsAdmin:  true,
+			Name:    "user1",
+			Email:   "user1@yopmail.com",
+			Balance: decimal.NewFromFloat(100.00),
+			IsAdmin: true,
 		},
 		{
-			Name:     "user2",
-			Email:    "user2@yopmail.com",
-			Balance:  decimal.NewFromFloat(200.00),
-			Password: string(hashedPassword),
-			IsAdmin:  false,
+			Name:    "user2",
+			Email:   "user2@yopmail.com",
+			Balance: decimal.NewFromFloat(200.00),
+			IsAdmin: false,
 		},
 		{
-			Name:     "user3",
-			Email:    "user3@yopmail.com",
-			Balance:  decimal.NewFromFloat(300.00),
-			Password: string(hashedPassword),
-			IsAdmin:  false,
+			Name:    "user3",
+			Email:   "user3@yopmail.com",
+			Balance: decimal.NewFromFloat(300.00),
+			IsAdmin: false,
 		},
 	}
 
 	for _, user := range users {
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte("password"), bcrypt.DefaultCost)
+		if err != nil {
+			panic(err)
+		}
+
 		var existingUser mysqlModel.User
 		result := db.Where("name = ?", user.Name).First(&existingUser)
 
@@ -168,7 +165,7 @@ func seedUsers(db *gorm.DB) {
 				Name:     user.Name,
 				Email:    user.Email,
 				Balance:  user.Balance,
-				Password: user.Password,
+				Password: string(hashedPassword),
 				IsAdmin:  user.IsAdmin,
 			}
 			db.Create(&newUser)
