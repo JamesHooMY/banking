@@ -3,8 +3,9 @@
 - [Project structure](#project-structure)
 - [Clean Architecture](#clean-architecture)
     - [Architecture Diagram](#architecture-diagram)
-- [Start the server](#start-the-server)
-- [Stop the server](#stop-the-server)
+- [Run the services](#run-the-services)
+  - [Start all services](#start-all-services)
+  - [Stop all services](#stop-all-services)
 - [Add New Restful api](#add-new-restful-api)
     - [Add new route](#add-new-route)
     - [Add new handler for user](#add-new-handler-for-user)
@@ -154,12 +155,21 @@ flowchart RL
 
 ```
 
-# Start the server
+# Run the services
+* This project uses docker-compose to run all services, including:
+    1. Banking service
+    2. Redis
+    3. MySQL
+    4. Elasticsearch
+    5. Kibana
+    6. APM server
+
+## Start all services
 ```bash
 make docker_up
 ```
 
-# Stop the server
+## Stop all services
 ```bash
 make docker_down
 ```
