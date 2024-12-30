@@ -4,6 +4,7 @@
 - [Clean Architecture](#clean-architecture)
     - [Architecture Diagram](#architecture-diagram)
 - [Run the services](#run-the-services)
+  - [Prepare yaml config.docker.yaml](#prepare-yaml-configdockeryaml)
   - [Start all services](#start-all-services)
   - [Stop all services](#stop-all-services)
 - [Add New Restful api](#add-new-restful-api)
@@ -163,6 +164,11 @@ flowchart RL
     4. Elasticsearch
     5. Kibana
     6. APM server
+
+## Prepare yaml config.docker.yaml
+```bash
+cp config/config.example.docker.yaml config/config.docker.yaml
+```
 
 ## Start all services
 ```bash
