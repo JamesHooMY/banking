@@ -13,6 +13,7 @@
     - [Add new service for user](#add-new-service-for-user)
     - [Add new repo for user using mysql database](#add-new-repo-for-user-using-mysql-database)
 - [Database ER Diagram](#database-er-diagram)
+- [Test Data](#test-data)
 
 # Project structure
 ```
@@ -243,4 +244,21 @@ erDiagram
         enum TransactionType "enum"
         string Details "text"
     }
+```
+
+# Test Data
+```
+Admin
+    Name: user1
+    Email: user1@yopmail.com
+    Password: password
+
+User
+    Name: user2
+    Email: user2@yopmail.com
+    Password: password
+
+    Name: user3
+    Email: user3@yopmail.com
+    Password: password
 ```
