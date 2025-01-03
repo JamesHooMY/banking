@@ -9,11 +9,9 @@ import (
 	v1 "banking/app/api/restful/v1"
 	transactionRepo "banking/app/repo/mysql/transaction"
 	"banking/domain"
-	"banking/global"
 
 	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
-	"go.elastic.co/apm/module/apmzap/v2"
 	"go.elastic.co/apm/v2"
 )
 
@@ -77,8 +75,6 @@ func (h *TransactionHandler) Transfer() gin.HandlerFunc {
 			return
 		}
 
-		global.Logger.With(apmzap.TraceContext(ctx)).Info(fmt.Sprintf("[Transfer]: fromUserId: %d, toUserId: %d, amount: %f", input.FromUserID, input.ToUserID, input.Amount))
-
 		c.JSON(http.StatusOK, &TransferResp{
 			Data: &Transaction{
 				FromUserID:      transaction.FromUserID,
@@ -126,8 +122,6 @@ func (h *TransactionHandler) Deposit() gin.HandlerFunc {
 			})
 			return
 		}
-
-		global.Logger.With(apmzap.TraceContext(ctx)).Info(fmt.Sprintf("[Deposit]: userId: %d, amount: %f", input.UserID, input.Amount))
 
 		c.JSON(http.StatusOK, &DepositResp{
 			Data: &Transaction{
@@ -186,8 +180,6 @@ func (h *TransactionHandler) Withdraw() gin.HandlerFunc {
 			return
 		}
 
-		global.Logger.With(apmzap.TraceContext(ctx)).Info(fmt.Sprintf("[Withdraw]: userId: %d, amount: %f", input.UserID, input.Amount))
-
 		c.JSON(http.StatusOK, &WithdrawResp{
 			Data: &Transaction{
 				FromUserID:      transaction.FromUserID,
@@ -236,14 +228,13 @@ func (h *TransactionHandler) GetTransactions() gin.HandlerFunc {
 			return
 		}
 
-		global.Logger.With(apmzap.TraceContext(ctx)).Info(fmt.Sprintf("[GetTransactions]: transactions: %v", transactions))
-
 		transactionList := make([]*Transaction, 0, len(transactions))
 		for _, t := range transactions {
 			transactionList = append(transactionList, &Transaction{
 				FromUserID:      t.FromUserID,
 				FromUserBalance: t.FromUserBalance,
 				ToUserID:        t.ToUserID,
+				ToUserBalance:   t.ToUserBalance,
 				Amount:          t.Amount,
 				TransactionType: t.TransactionType,
 				Details:         t.Details,
